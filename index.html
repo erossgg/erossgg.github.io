@@ -1,0 +1,1676 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Photo Toolbox · 摄影师工具箱</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;background:#0a0a0a;color:#e0e0e0;min-height:100vh}
+header{padding:20px 32px 0;border-bottom:1px solid #1a1a1a}
+.htop{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+h1{font-size:20px;font-weight:300;letter-spacing:3px;text-transform:uppercase}
+h1 span{font-weight:600;color:#f0c674}
+.tabs{display:flex;gap:0;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:10px 18px;background:0;border:none;color:#666;font-size:12px;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:.2s;font-family:inherit}
+.tab:hover{color:#aaa}.tab.active{color:#f0c674;border-bottom-color:#f0c674}
+.page{display:none;padding:20px 32px 60px}.page.active{display:block}
+.stitle{font-size:10px;text-transform:uppercase;letter-spacing:3px;color:#555;margin:20px 0 12px;font-weight:500}
+.btn{padding:7px 16px;border:1px solid #333;background:0;color:#ccc;border-radius:6px;cursor:pointer;font-size:12px;transition:.2s;font-family:inherit}
+.btn:hover{background:#fff;color:#000}.btn-a{background:#f0c674;color:#000;border-color:#f0c674;font-weight:500}
+.frow{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;margin-bottom:14px}
+.fg{display:flex;flex-direction:column;gap:3px}
+.fg label{font-size:10px;color:#666;text-transform:uppercase;letter-spacing:1px}
+.fg select,.fg input{padding:7px 10px;background:#111;border:1px solid #252525;color:#ccc;border-radius:6px;font-size:13px;font-family:inherit;outline:0;min-width:100px}
+.fg select:focus,.fg input:focus{border-color:#f0c674}
+.tag{padding:4px 12px;border:1px solid #2a2a2a;background:#151515;color:#888;border-radius:18px;cursor:pointer;font-size:11px;transition:.2s;font-family:inherit}
+.tag.active{background:#f0c674;color:#000;border-color:#f0c674}.tag:hover{border-color:#555}
+.dz{padding:40px;border:2px dashed #252525;border-radius:14px;text-align:center;cursor:pointer;transition:.3s}
+.dz:hover,.dz.over{border-color:#f0c674;background:rgba(240,198,116,.03)}
+.dz .di{font-size:32px;margin-bottom:8px;opacity:.4}.dz p{font-size:13px;color:#666}.dz .ht{font-size:10px;color:#444;margin-top:4px}
+.dz input{display:none}
+.card{background:#111;border:1px solid #1a1a1a;border-radius:14px;padding:20px;transition:.2s}
+.card:hover{border-color:#282828}.card h3{font-size:14px;font-weight:500;margin-bottom:6px}.card p{font-size:11px;color:#777;line-height:1.6}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.rbox{background:#0d0d0d;border:1px solid #1a1a1a;border-radius:12px;padding:16px;margin-top:14px}
+.rval{font-size:28px;font-weight:600;color:#f0c674;font-family:'SF Mono',monospace}
+.rlbl{font-size:11px;color:#666;margin-top:2px}
+.rrow{display:flex;gap:28px;flex-wrap:wrap}.ri{text-align:center}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#f0c674;color:#000;padding:8px 20px;border-radius:8px;font-size:12px;opacity:0;transition:.3s;pointer-events:none;z-index:99;font-weight:500}
+.toast.show{opacity:1}
+canvas.hid{display:none}
+
+/* Scene */
+.sarea{display:flex;gap:20px;margin-top:12px;flex-wrap:wrap}
+.sprev{width:380px;max-width:100%;border-radius:10px;overflow:hidden;position:relative;background:#111;flex-shrink:0}
+.sprev img{width:100%;display:block}
+.sprev .rbtn{position:absolute;top:8px;right:8px;padding:4px 10px;background:rgba(0,0,0,.7);border:1px solid #444;color:#ccc;border-radius:6px;cursor:pointer;font-size:10px}
+.pcard{flex:1;min-width:260px}
+.pstrip{display:flex;border-radius:8px;overflow:hidden;height:48px;margin-bottom:8px}
+.pstrip .sw{flex:1;cursor:pointer;position:relative;transition:flex .3s}
+.pstrip .sw:hover{flex:2}
+.pstrip .sw .lb{position:absolute;bottom:2px;left:50%;transform:translateX(-50%);font-size:9px;color:rgba(255,255,255,.85);text-shadow:0 1px 3px rgba(0,0,0,.8);opacity:0;transition:.2s;white-space:nowrap}
+.pstrip .sw:hover .lb{opacity:1}
+.cdlist{display:flex;flex-direction:column;gap:3px}
+.cdet{display:flex;align-items:center;gap:8px;padding:4px 8px;background:#111;border-radius:6px;cursor:pointer}
+.cdet:hover{background:#1a1a1a}
+.cdot{width:22px;height:22px;border-radius:5px;flex-shrink:0}
+.cinf{font-size:11px;color:#aaa}.cinf .hx{color:#ddd;font-weight:500;font-family:'SF Mono',monospace}.cinf .nm{margin-left:6px;color:#777}.cinf .pc{margin-left:6px;color:#555}
+.stags{margin-top:10px;display:flex;gap:6px;flex-wrap:wrap}
+.atag{padding:3px 8px;background:#151515;border:1px solid #252525;border-radius:12px;font-size:10px;color:#999}
+.atag b{color:#ddd;font-weight:400}
+.ogrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.ocard{background:#111;border:1px solid #1a1a1a;border-radius:12px;padding:16px;transition:.2s;animation:fadeIn .35s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.ocard:hover{border-color:#333}
+.ocard h3{font-size:13px;font-weight:500;margin-bottom:3px}
+.odesc{font-size:11px;color:#666;margin-bottom:10px;line-height:1.4}
+.ocolors{display:flex;gap:6px;margin-bottom:10px}
+.oci{display:flex;flex-direction:column;align-items:center;gap:2px;width:72px}
+.ochip{width:48px;height:48px;border-radius:10px;cursor:pointer;border:2px solid #222;transition:transform .15s,background-color .4s}
+.ochip:hover{transform:scale(1.1)}
+.ocl{font-size:8px;color:#666;font-family:monospace}.ocr{font-size:8px;color:#555}
+.htype{display:inline-block;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:500;margin-bottom:6px}
+.ht-comp{background:rgba(129,199,132,.15);color:#81c784}.ht-ana{background:rgba(100,181,246,.15);color:#64b5f6}.ht-spl{background:rgba(255,183,77,.15);color:#ffb74d}
+.hbar{height:3px;background:#1a1a1a;border-radius:2px;margin-top:8px;overflow:hidden}
+.hfill{height:100%;border-radius:2px;background:linear-gradient(90deg,#f0c674,#81c784)}
+.hlbl{font-size:9px;color:#555;margin-top:3px;display:flex;justify-content:space-between}
+.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+.tcard{background:#111;border:1px solid #1a1a1a;border-radius:10px;padding:14px}
+.tcard .ti{font-size:18px;margin-bottom:4px}.tcard h4{font-size:12px;font-weight:500;margin-bottom:3px}.tcard p{font-size:11px;color:#666;line-height:1.5}
+
+/* DOF */
+.dof-vis{height:70px;background:#111;border-radius:10px;margin-top:12px;position:relative;overflow:hidden}
+.dof-bar{position:absolute;top:16px;height:38px;border-radius:6px;background:linear-gradient(90deg,rgba(240,198,116,.08),rgba(240,198,116,.25),rgba(240,198,116,.08));border:1px solid rgba(240,198,116,.3);transition:.4s}
+.dof-foc{position:absolute;top:12px;width:2px;height:46px;background:#f0c674;border-radius:2px;transition:left .4s}
+
+/* Comp */
+.cc{position:relative;display:inline-block;max-width:100%;border-radius:10px;overflow:hidden;background:#111}
+.cc img{display:block;max-width:100%;max-height:50vh}.cc canvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}
+.comp-img-area{text-align:center;margin:12px 0;padding:12px;background:#080808;border:1px solid #141414;border-radius:14px}
+.comp-toolbar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:8px 0;border-bottom:1px solid #141414;margin-bottom:8px}
+.comp-toolbar .sep{width:1px;height:20px;background:#252525;margin:0 4px}
+.comp-panels{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px}
+.comp-panel{background:#111;border:1px solid #1a1a1a;border-radius:12px;padding:16px;min-width:0}
+.comp-panel h4{font-size:11px;color:#555;margin-bottom:8px;font-weight:500;text-transform:uppercase;letter-spacing:1px}
+.histo-canvas{width:100%;height:140px;display:block;border-radius:6px}
+.histo-tabs{display:flex;gap:4px;margin-bottom:8px}
+.histo-tab{padding:3px 10px;border:1px solid #252525;background:#0d0d0d;color:#666;border-radius:12px;font-size:10px;cursor:pointer;font-family:inherit;transition:.2s}
+.histo-tab.active{border-color:#555;color:#ccc}
+.histo-tab[data-ch="r"].active{color:#f06060;border-color:#f06060}
+.histo-tab[data-ch="g"].active{color:#60c060;border-color:#60c060}
+.histo-tab[data-ch="b"].active{color:#6080f0;border-color:#6080f0}
+.tone-bar{height:8px;background:#1a1a1a;border-radius:4px;overflow:hidden;display:flex;margin-bottom:6px}
+.tone-bar div{height:100%;transition:width .4s}
+.tone-labels{display:flex;justify-content:space-between;font-size:9px;color:#555;margin-bottom:10px}
+.tone-meter{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.tone-meter-label{font-size:10px;color:#777;width:50px;flex-shrink:0}
+.tone-meter-bar{flex:1;height:6px;background:#1a1a1a;border-radius:3px;overflow:hidden}
+.tone-meter-fill{height:100%;border-radius:3px;transition:width .4s}
+.tone-meter-val{font-size:11px;color:#ccc;width:36px;text-align:right;font-family:'SF Mono',monospace}
+.info-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.info-item{display:flex;flex-direction:column;gap:1px}
+.info-item .ik{font-size:9px;color:#555;text-transform:uppercase}.info-item .iv{font-size:12px;color:#ccc;font-family:'SF Mono',monospace}
+.crop-tags{display:flex;gap:4px;flex-wrap:wrap}
+
+/* Hue Wheel */
+.hue-canvas{display:block;margin:0 auto;border-radius:50%}
+
+/* Color Balance */
+.bal-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.bal-label{font-size:10px;width:14px;font-weight:600;text-align:center}
+.bal-bar-wrap{flex:1;height:8px;background:#1a1a1a;border-radius:4px;position:relative;overflow:hidden}
+.bal-bar-fill{height:100%;border-radius:4px;transition:width .4s}
+.bal-val{font-size:10px;color:#aaa;width:32px;text-align:right;font-family:'SF Mono',monospace}
+.bal-note{font-size:10px;color:#666;margin-top:6px;padding:6px 8px;background:#0d0d0d;border-radius:6px;line-height:1.5}
+
+/* Zebra / toggles */
+.comp-toggle{display:flex;align-items:center;gap:5px;font-size:11px;color:#888;cursor:pointer;white-space:nowrap}
+.comp-toggle input[type=checkbox]{appearance:none;width:30px;height:16px;background:#252525;border-radius:8px;position:relative;cursor:pointer;transition:.2s;flex-shrink:0}
+.comp-toggle input[type=checkbox]::after{content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;background:#555;border-radius:50%;transition:.2s}
+.comp-toggle input[type=checkbox]:checked{background:#f0c674}
+.comp-toggle input[type=checkbox]:checked::after{left:16px;background:#000}
+
+/* Image filters */
+.cc.flip-h img{transform:scaleX(-1)}
+.cc.bw img{filter:grayscale(1)}
+.cc.flip-h.bw img{transform:scaleX(-1);filter:grayscale(1)}
+
+/* Magnifier */
+.magnifier{position:absolute;width:160px;height:160px;border-radius:50%;border:2px solid rgba(240,198,116,.6);pointer-events:none;display:none;overflow:hidden;box-shadow:0 0 20px rgba(0,0,0,.6);z-index:10}
+.magnifier canvas{position:absolute;top:0;left:0}
+
+/* Focus map */
+.focus-canvas{width:100%;height:auto;display:block;border-radius:8px;margin-top:4px}
+.focus-score{display:flex;align-items:center;gap:10px;margin-top:8px}
+.focus-score .fs-val{font-size:24px;font-weight:600;font-family:'SF Mono',monospace}
+.focus-score .fs-label{font-size:10px;color:#666}
+
+/* Checklist Generator */
+.cl-setup{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+.cl-group{display:flex;flex-direction:column;gap:4px}
+.cl-group label{font-size:10px;color:#666;text-transform:uppercase;letter-spacing:1px}
+.cl-group select{padding:8px 12px;background:#111;border:1px solid #252525;color:#ccc;border-radius:8px;font-size:13px;font-family:inherit;outline:0;min-width:140px}
+.cl-group select:focus{border-color:#f0c674}
+.cl-types{display:flex;gap:6px;flex-wrap:wrap}
+.cl-type{padding:8px 16px;border:1px solid #252525;background:#111;color:#888;border-radius:10px;cursor:pointer;font-size:12px;transition:.2s;font-family:inherit;text-align:center}
+.cl-type:hover{border-color:#444}.cl-type.active{background:#f0c674;color:#000;border-color:#f0c674;font-weight:500}
+.cl-type .cl-icon{font-size:20px;display:block;margin-bottom:2px}
+
+.cl-output{display:none;animation:fadeIn .4s ease}
+.cl-header{background:linear-gradient(135deg,#1a1400,#0d0d0d);border:1px solid #2a2200;border-radius:16px;padding:24px;margin-bottom:16px}
+.cl-header h2{font-size:18px;font-weight:500;color:#f0c674;margin-bottom:4px}
+.cl-header .cl-meta{font-size:11px;color:#666;display:flex;gap:16px;flex-wrap:wrap;margin-top:8px}
+.cl-header .cl-meta span{display:flex;align-items:center;gap:4px}
+
+.cl-sections{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.cl-section{background:#111;border:1px solid #1a1a1a;border-radius:14px;padding:18px;transition:border-color .2s}
+.cl-section:hover{border-color:#252525}
+.cl-section h3{font-size:13px;font-weight:500;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.cl-section h3 .sec-icon{font-size:16px}
+.cl-item{display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:1px solid #141414;font-size:12px;color:#bbb}
+.cl-item:last-child{border-bottom:none}
+.cl-item input[type=checkbox]{appearance:none;width:18px;height:18px;border:1.5px solid #333;border-radius:5px;flex-shrink:0;cursor:pointer;position:relative;transition:.2s;margin-top:1px}
+.cl-item input[type=checkbox]:checked{background:#f0c674;border-color:#f0c674}
+.cl-item input[type=checkbox]:checked::after{content:'✓';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:12px;color:#000;font-weight:700}
+.cl-item label{cursor:pointer;line-height:1.4;flex:1}
+.cl-item label span{color:#666;font-size:10px;display:block;margin-top:1px}
+.cl-item.checked label{color:#555;text-decoration:line-through}
+
+.cl-notes{background:#0d0d0d;border:1px solid #1a1a1a;border-radius:12px;padding:16px;margin-top:14px}
+.cl-notes h3{font-size:13px;font-weight:500;margin-bottom:8px;color:#e57373;display:flex;align-items:center;gap:6px}
+.cl-notes ul{list-style:none;padding:0}
+.cl-notes li{font-size:12px;color:#999;padding:4px 0;padding-left:16px;position:relative;line-height:1.5}
+.cl-notes li::before{content:'⚠';position:absolute;left:0;font-size:10px}
+
+.cl-actions{display:flex;gap:8px;margin-top:16px}
+
+@media(max-width:1200px){.comp-panels{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:640px){.comp-panels,.cl-sections{grid-template-columns:1fr}}
+
+/* Golden */
+.tl{height:100px;background:#111;border-radius:10px;position:relative;overflow:hidden;margin-top:12px}
+.tls{position:absolute;top:0;height:100%;display:flex;align-items:flex-end;justify-content:center;padding-bottom:6px}
+.tls .sl{font-size:9px;color:rgba(255,255,255,.7);white-space:nowrap}
+.tmk{display:flex;justify-content:space-between;margin-top:3px;font-size:9px;color:#555}
+.ghcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-top:14px}
+.ghc{background:#111;border:1px solid #1a1a1a;border-radius:10px;padding:12px;text-align:center}
+.ghc .gi{font-size:24px;margin-bottom:4px}.ghc .gl{font-size:10px;color:#666}.ghc .gt{font-size:16px;font-weight:600;color:#ddd;font-family:'SF Mono',monospace}
+
+/* Expo */
+.expo-tri{display:flex;justify-content:center;align-items:center;gap:32px;margin:20px 0;flex-wrap:wrap}
+.edial{width:120px;height:120px;border-radius:50%;border:2px solid #252525;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:.3s}
+.edial.hl{border-color:#f0c674}
+.edial .dv{font-size:20px;font-weight:600;color:#f0c674;font-family:'SF Mono',monospace}
+.edial .dl{font-size:10px;color:#666;margin-top:3px}.edial .ds{font-size:9px;color:#444}
+.econn{font-size:18px;color:#333}
+.evd{text-align:center;margin:12px 0}
+.evd .evv{font-size:40px;font-weight:300;color:#f0c674;font-family:'SF Mono',monospace}
+.evd .evl{font-size:11px;color:#555}
+
+/* Watermark */
+.wmpa{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin-top:12px}
+.wmt{border-radius:8px;overflow:hidden;background:#111}
+.wmt canvas{display:block;width:100%;height:auto}
+
+/* Outfit Preview Silhouette */
+.sim-preview{margin-top:24px}
+.sim-grid{display:flex;gap:16px;flex-wrap:wrap}
+.sim-card{position:relative;width:200px;height:280px;border-radius:12px;overflow:hidden;background:#111;border:1px solid #1a1a1a;cursor:pointer;transition:border-color .2s;animation:fadeIn .4s ease}
+.sim-card:hover{border-color:#333}
+.sim-card canvas{width:100%;height:100%;display:block}
+.sim-card .sim-label{position:absolute;bottom:0;left:0;right:0;padding:8px;background:linear-gradient(transparent,rgba(0,0,0,.8));font-size:11px;color:#ccc;text-align:center}
+
+/* Avoid Colors */
+.avoid-section{margin-top:24px}
+.avoid-list{display:flex;gap:10px;flex-wrap:wrap}
+.avoid-item{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#1a0a0a;border:1px solid #3a1515;border-radius:10px}
+.avoid-chip{width:32px;height:32px;border-radius:8px;border:2px solid #333;position:relative}
+.avoid-chip::after{content:'✕';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:16px;color:rgba(255,60,60,.8);font-weight:700}
+.avoid-info{font-size:11px}
+.avoid-info .avoid-name{color:#e57373;font-weight:500}
+.avoid-info .avoid-reason{color:#777;display:block;margin-top:1px;font-size:10px}
+
+/* Garment items in outfit card */
+.garment-tag{display:inline-block;padding:2px 8px;background:#1a1a1a;border:1px solid #252525;border-radius:8px;font-size:9px;color:#999;margin-top:2px}
+
+@media(max-width:768px){header,.page{padding-left:12px;padding-right:12px}.sprev{width:100%}}
+</style>
+</head>
+<body>
+<header>
+<div class="htop"><h1><span>Photo</span> Toolbox</h1></div>
+<div class="tabs" id="tabs">
+<button class="tab active" data-t="scene">🎨 场景配色</button>
+<button class="tab" data-t="dof">🔭 景深计算</button>
+<button class="tab" data-t="golden">🌅 黄金时间</button>
+<button class="tab" data-t="comp">📐 构图辅助</button>
+<button class="tab" data-t="expo">📸 曝光计算</button>
+<button class="tab" data-t="wm">💧 批量水印</button>
+<button class="tab" data-t="focus">🔍 焦点检测</button>
+<button class="tab" data-t="checklist">📋 拍摄清单</button>
+</div>
+</header>
+
+<!-- TAB 1: Scene -->
+<div class="page active" id="p-scene">
+<div class="frow" style="gap:8px;padding:8px 0">
+<div class="fg"><label>风格</label><div id="styleTags" style="display:flex;gap:4px;flex-wrap:wrap">
+<button class="tag active" data-s="自然清新">自然清新</button><button class="tag" data-s="复古胶片">复古胶片</button>
+<button class="tag" data-s="日系">日系</button><button class="tag" data-s="情绪暗调">情绪暗调</button>
+<button class="tag" data-s="新中式">新中式</button><button class="tag" data-s="韩系">韩系</button>
+</div></div>
+<div class="fg"><label>时段</label><select id="timeSelect"><option value="auto">自动</option><option value="golden">黄金时段</option><option value="midday">正午</option><option value="overcast">阴天</option><option value="blue">蓝调</option></select></div>
+<div class="fg"><label>肤色</label><select id="skinTone"><option value="n">中性</option><option value="w">暖白</option><option value="c">冷白</option><option value="t">小麦</option><option value="d">深肤</option></select></div>
+</div>
+<div class="dz" id="sDZ"><div class="di">📷</div><p>拖放场景图或点击选择</p><input type="file" id="sFI" accept="image/*"></div>
+<div id="sR" style="display:none">
+<div class="stitle">场景分析</div>
+<div class="sarea"><div class="sprev"><img id="sImg"><button class="rbtn" id="sRB">更换</button></div>
+<div class="pcard"><div class="pstrip" id="pStrip"></div><div class="cdlist" id="colorDL"></div><div class="stags" id="sTags"></div></div></div>
+<div class="stitle" style="margin-top:24px">服装配色推荐</div><div class="ogrid" id="oGrid"></div>
+<div class="avoid-section"><div class="stitle">避坑色警告 · Colors to Avoid</div><div class="avoid-list" id="avoidList"></div></div>
+<div class="sim-preview"><div class="stitle">场景模拟预览 · Preview in Scene</div><div class="sim-grid" id="simGrid"></div></div>
+<div class="stitle" style="margin-top:24px">拍摄建议</div><div class="tgrid" id="tipG"></div>
+<div style="margin-top:16px"><button class="btn btn-a" id="expBtn">导出报告</button> <button class="btn" id="sClr">清空</button></div>
+</div>
+</div>
+
+<!-- TAB 2: DOF -->
+<div class="page" id="p-dof">
+<div class="stitle">景深计算器</div>
+<div class="frow">
+<div class="fg"><label>焦距mm</label><input type="number" id="dF" value="50" min="1"></div>
+<div class="fg"><label>光圈f/</label><select id="dA"><option>1.2</option><option>1.4</option><option>1.8</option><option>2</option><option selected>2.8</option><option>4</option><option>5.6</option><option>8</option><option>11</option><option>16</option><option>22</option></select></div>
+<div class="fg"><label>距离m</label><input type="number" id="dD" value="3" min="0.1" step="0.1"></div>
+<div class="fg"><label>画幅</label><select id="dS"><option value="43.27">全幅</option><option value="28.85">APS-C(C)</option><option value="28.21">APS-C(S/N)</option><option value="21.63">M43</option></select></div>
+</div>
+<div class="rbox"><div class="rrow">
+<div class="ri"><div class="rval" id="dR">—</div><div class="rlbl">景深范围</div></div>
+<div class="ri"><div class="rval" id="dN" style="font-size:20px;color:#81c784">—</div><div class="rlbl">近界</div></div>
+<div class="ri"><div class="rval" id="dFr" style="font-size:20px;color:#64b5f6">—</div><div class="rlbl">远界</div></div>
+<div class="ri"><div class="rval" id="dH" style="font-size:20px;color:#ce93d8">—</div><div class="rlbl">超焦距</div></div>
+</div><div class="dof-vis" id="dV"><div class="dof-bar" id="dB"></div><div class="dof-foc" id="dFL"></div></div></div>
+<div class="cgrid" style="margin-top:16px">
+<div class="card"><h3>景深小贴士</h3><p>光圈越大(f值小)景深越浅 · 焦距越长景深越浅 · 对焦越近景深越浅 · 全幅比APS-C景深更浅</p></div>
+<div class="card"><h3>人像常用</h3><p>半身：85mm f/1.8 2-3m · 全身：50mm f/2.8 4-5m · 环境人像：35mm f/4 3m · 合影：50mm f/5.6 4m</p></div>
+</div>
+</div>
+
+<!-- TAB 3: Golden Hour -->
+<div class="page" id="p-golden">
+<div class="stitle">黄金时间计算</div>
+<div class="frow">
+<div class="fg"><label>纬度</label><input type="number" id="gLa" value="39.9" step="0.1"></div>
+<div class="fg"><label>经度</label><input type="number" id="gLn" value="116.4" step="0.1"></div>
+<div class="fg"><label>日期</label><input type="date" id="gDt"></div>
+<div class="fg"><label>时区UTC</label><input type="number" id="gTz" value="8" step="0.5"></div>
+<button class="btn" id="gLoc" style="align-self:flex-end;font-size:11px">📍 定位</button>
+<button class="btn btn-a" id="gCalc" style="align-self:flex-end;font-size:11px">计算</button>
+</div>
+<div class="frow" style="gap:4px">
+<button class="tag" data-c="39.9,116.4,8">北京</button><button class="tag" data-c="31.2,121.5,8">上海</button>
+<button class="tag" data-c="23.1,113.3,8">广州</button><button class="tag" data-c="30.6,104.1,8">成都</button>
+<button class="tag" data-c="35.7,139.7,9">东京</button><button class="tag" data-c="48.9,2.35,1">巴黎</button>
+<button class="tag" data-c="40.7,-74.0,-5">纽约</button>
+</div>
+<div class="tl" id="gTL"></div><div class="tmk" id="gTM"></div>
+<div class="ghcards" id="gCards"></div>
+<div class="card" style="margin-top:14px"><h3>时间段指南</h3><p>蓝调：日出前/落后25min，天空深蓝 · 黄金时段：日出后/落前1h，光线柔和金黄 · 正午：光硬阴影重 · 余晖：日落后15min色彩最丰富</p></div>
+</div>
+
+<!-- TAB 4: Composition -->
+<div class="page" id="p-comp">
+<div class="stitle">构图辅助 · Composition</div>
+
+<!-- Toolbar Row 1: Composition types -->
+<div class="frow" style="gap:4px;margin-bottom:4px" id="compCtrl">
+<button class="tag active" data-cp="thirds">三分法</button><button class="tag" data-cp="golden">黄金分割</button>
+<button class="tag" data-cp="diag">对角线</button><button class="tag" data-cp="spiral">黄金螺旋</button>
+<button class="tag" data-cp="tri">三角</button><button class="tag" data-cp="center">中心</button>
+</div>
+
+<!-- Toolbar Row 2: Controls + Toggles -->
+<div class="comp-toolbar">
+<div class="fg"><label>颜色</label><input type="color" id="cCol" value="#f0c674" style="width:36px;height:24px;padding:1px;border-radius:4px;border:1px solid #333;background:#111;cursor:pointer"></div>
+<div class="fg"><label>透明度</label><input type="range" id="cOp" min="10" max="100" value="60" style="min-width:100px"></div>
+<div class="fg"><label>线宽</label><input type="range" id="cLw" min="1" max="6" value="2" style="min-width:60px"></div>
+<div class="sep"></div>
+<label class="comp-toggle"><input type="checkbox" id="zebraChk">斑马线</label>
+<label class="comp-toggle"><input type="checkbox" id="flipChk">翻转</label>
+<label class="comp-toggle"><input type="checkbox" id="bwChk">黑白</label>
+<label class="comp-toggle"><input type="checkbox" id="magChk">放大镜</label>
+<div class="sep"></div>
+<button class="btn" id="cDL" style="font-size:11px">下载</button>
+<button class="btn" id="cClr" style="font-size:11px">清空</button>
+</div>
+
+<!-- Drop zone -->
+<div class="dz" id="cDZ"><div class="di">📐</div><p>拖放照片查看构图辅助线</p><input type="file" id="cFI" accept="image/*"></div>
+
+<!-- Content -->
+<div id="cPV" style="display:none">
+<!-- Image -->
+<div class="comp-img-area">
+<div class="cc" id="cC"><img id="cImg"><canvas id="cCv"></canvas><div class="magnifier" id="magLens"><canvas id="magCv"></canvas></div></div>
+</div>
+
+<!-- Panels: single row -->
+<div class="comp-panels">
+<div class="comp-panel">
+<h4>直方图</h4>
+<div class="histo-tabs" id="histoTabs">
+<button class="histo-tab active" data-ch="lum">亮度</button>
+<button class="histo-tab" data-ch="r">R</button>
+<button class="histo-tab" data-ch="g">G</button>
+<button class="histo-tab" data-ch="b">B</button>
+<button class="histo-tab" data-ch="all">全部</button>
+</div>
+<canvas class="histo-canvas" id="histoCv"></canvas>
+</div>
+<div class="comp-panel">
+<h4>影调 / 色调</h4>
+<div id="toneContent"></div>
+</div>
+<div class="comp-panel" style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap">
+<div style="flex-shrink:0"><h4>色相分布</h4><canvas class="hue-canvas" id="hueCv" width="160" height="160"></canvas></div>
+<div style="flex:1;min-width:140px"><h4>色彩平衡</h4><div id="balContent"></div></div>
+</div>
+<div class="comp-panel">
+<h4>图片信息</h4>
+<div class="info-grid" id="imgInfoGrid"></div>
+<h4 style="margin-top:12px">裁剪比例</h4>
+<div class="crop-tags" id="cropTags">
+<button class="tag active" data-cr="0">关闭</button>
+<button class="tag" data-cr="1:1">1:1</button>
+<button class="tag" data-cr="4:5">4:5</button>
+<button class="tag" data-cr="2:3">2:3</button>
+<button class="tag" data-cr="3:4">3:4</button>
+<button class="tag" data-cr="9:16">9:16</button>
+<button class="tag" data-cr="16:9">16:9</button>
+<button class="tag" data-cr="2.35:1">2.35:1</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- TAB 5: Exposure -->
+<div class="page" id="p-expo">
+<div class="stitle">曝光三角计算器</div>
+<p style="font-size:11px;color:#555;margin-bottom:12px">调整参数实时查看曝光值EV，锁定一个参数可反算等效值</p>
+<div class="frow">
+<div class="fg"><label>光圈f/</label><select id="eA"><option>1</option><option>1.2</option><option>1.4</option><option>1.8</option><option>2</option><option selected>2.8</option><option>4</option><option>5.6</option><option>8</option><option>11</option><option>16</option><option>22</option></select></div>
+<div class="fg"><label>快门</label><select id="eS"><option value="30">30s</option><option value="15">15s</option><option value="8">8s</option><option value="4">4s</option><option value="2">2s</option><option value="1">1s</option><option value="0.5">1/2</option><option value="0.25">1/4</option><option value="0.125">1/8</option><option value="0.0667">1/15</option><option value="0.0333">1/30</option><option value="0.0167">1/60</option><option value="0.008" selected>1/125</option><option value="0.004">1/250</option><option value="0.002">1/500</option><option value="0.001">1/1000</option><option value="0.0005">1/2000</option><option value="0.00025">1/4000</option><option value="0.000125">1/8000</option></select></div>
+<div class="fg"><label>ISO</label><select id="eI"><option>50</option><option selected>100</option><option>200</option><option>400</option><option>800</option><option>1600</option><option>3200</option><option>6400</option><option>12800</option></select></div>
+</div>
+<div class="evd"><div class="evv" id="eEV">EV 13.6</div><div class="evl">曝光值 Exposure Value</div></div>
+<div class="expo-tri">
+<div class="edial" id="edA"><div class="dv" id="edAv">f/2.8</div><div class="dl">光圈</div><div class="ds">景深</div></div>
+<div class="econn">⟷</div>
+<div class="edial" id="edS"><div class="dv" id="edSv">1/125</div><div class="dl">快门</div><div class="ds">运动</div></div>
+<div class="econn">⟷</div>
+<div class="edial" id="edI"><div class="dv" id="edIv">100</div><div class="dl">ISO</div><div class="ds">噪点</div></div>
+</div>
+<div class="cgrid">
+<div class="card"><h3>曝光参考</h3><p>阳光16法则：晴天f/16快门=1/ISO · 室内自然光EV7-9 · 黄金时段EV11-13 · 夜景EV3-6 · 星空EV-2~0</p></div>
+<div class="card"><h3>快门指南</h3><p>1/8000冻结飞鸟 · 1/1000运动 · 1/250走路 · 1/60手持下限 · 1/15追焦 · 1s+丝滑水流光轨</p></div>
+</div>
+</div>
+
+<!-- TAB 6: Watermark -->
+<div class="page" id="p-wm">
+<div class="stitle">批量水印</div>
+<div class="frow">
+<div class="fg"><label>水印文字</label><input type="text" id="wT" value="© Photography" style="min-width:180px"></div>
+<div class="fg"><label>大小</label><input type="number" id="wFs" value="24" min="8" max="200"></div>
+<div class="fg"><label>颜色</label><input type="color" id="wCl" value="#ffffff" style="width:40px;height:28px;padding:1px;border-radius:4px;border:1px solid #333;background:#111;cursor:pointer"></div>
+<div class="fg"><label>透明度%</label><input type="number" id="wOp" value="30" min="5" max="100"></div>
+</div>
+<div class="frow">
+<div class="fg"><label>位置</label><select id="wPos"><option value="br">右下</option><option value="bl">左下</option><option value="bc">底部居中</option><option value="ct">画面居中</option><option value="tile">平铺</option></select></div>
+<div class="fg"><label>旋转°</label><input type="number" id="wRot" value="-30" min="-90" max="90"></div>
+<button class="btn btn-a" id="wDL" style="align-self:flex-end;font-size:11px">下载全部</button>
+<button class="btn" id="wClr" style="align-self:flex-end;font-size:11px">清空</button>
+</div>
+<div class="dz" id="wDZ"><div class="di">💧</div><p>拖放照片批量加水印（可多选）</p><input type="file" id="wFI" accept="image/*" multiple></div>
+<div class="wmpa" id="wPA"></div>
+</div>
+
+<!-- TAB 7: Focus Detection -->
+<div class="page" id="p-focus">
+<div class="stitle">焦点区域检测 · Focus Detection</div>
+<p style="font-size:12px;color:#555;margin-bottom:14px">上传照片后自动检测锐利区域，黄绿色高亮标记对焦准确的部分</p>
+<div class="dz" id="focusDZ"><div class="di">🔍</div><p>拖放照片检测焦点区域</p><input type="file" id="focusFI" accept="image/*"></div>
+<div id="focusPV" style="display:none">
+<div style="display:flex;gap:20px;flex-wrap:wrap;margin-top:12px">
+<div style="flex:1;min-width:300px">
+<div class="comp-panel">
+<h4>原图</h4>
+<img id="focusOrigImg" style="width:100%;border-radius:8px;display:block">
+</div>
+</div>
+<div style="flex:1;min-width:300px">
+<div class="comp-panel">
+<h4>焦点热力图</h4>
+<canvas class="focus-canvas" id="focusCv" style="width:100%"></canvas>
+<div class="focus-score" id="focusScore"></div>
+</div>
+</div>
+</div>
+<div style="margin-top:12px">
+<button class="btn" id="focusClr" style="font-size:11px">清空</button>
+</div>
+</div>
+</div>
+
+<!-- TAB 8: Checklist -->
+<div class="page" id="p-checklist">
+<div class="stitle">拍摄清单生成器 · Shoot Checklist</div>
+
+<div class="cl-setup">
+<div class="cl-group">
+<label>拍摄类型</label>
+<div class="cl-types" id="clTypes">
+<button class="cl-type active" data-type="portrait"><span class="cl-icon">👤</span>人像写真</button>
+<button class="cl-type" data-type="wedding"><span class="cl-icon">💍</span>婚纱婚礼</button>
+<button class="cl-type" data-type="family"><span class="cl-icon">👨‍👩‍👧</span>亲子全家福</button>
+<button class="cl-type" data-type="product"><span class="cl-icon">📦</span>产品静物</button>
+<button class="cl-type" data-type="food"><span class="cl-icon">🍽️</span>美食</button>
+<button class="cl-type" data-type="landscape"><span class="cl-icon">🏔️</span>风光</button>
+<button class="cl-type" data-type="street"><span class="cl-icon">🌃</span>街拍纪实</button>
+<button class="cl-type" data-type="event"><span class="cl-icon">🎤</span>活动会议</button>
+</div>
+</div>
+</div>
+<div class="cl-setup">
+<div class="cl-group"><label>场地</label><select id="clVenue"><option value="outdoor">户外</option><option value="indoor">室内</option><option value="studio">影棚</option><option value="both">室内+户外</option></select></div>
+<div class="cl-group"><label>时长</label><select id="clDuration"><option value="1">1小时</option><option value="2" selected>2小时</option><option value="4">半天</option><option value="8">全天</option></select></div>
+<div class="cl-group"><label>人数</label><select id="clPeople"><option value="1" selected>1人</option><option value="2">2人</option><option value="3-5">3-5人</option><option value="5+">5人以上</option></select></div>
+<div class="cl-group"><label>季节</label><select id="clSeason"><option value="spring">春</option><option value="summer">夏</option><option value="autumn">秋</option><option value="winter">冬</option></select></div>
+<button class="btn btn-a" id="clGenBtn" style="align-self:flex-end">生成清单</button>
+</div>
+
+<div class="cl-output" id="clOutput">
+<div class="cl-header" id="clHeader"></div>
+<div class="cl-sections" id="clSections"></div>
+<div class="cl-notes" id="clNotes"></div>
+<div class="cl-actions">
+<button class="btn btn-a" id="clExportBtn">导出清单图片</button>
+<button class="btn" id="clResetBtn">重新生成</button>
+</div>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+<canvas class="hid" id="wkCv"></canvas><canvas class="hid" id="exCv"></canvas>
+
+<script>
+// === Shared ===
+const $=id=>document.getElementById(id);
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1500)}
+function copyColor(h){navigator.clipboard.writeText(h).then(()=>toast('已复制 '+h))}
+function hex(r,g,b){return'#'+[r,g,b].map(x=>x.toString(16).padStart(2,'0')).join('')}
+function rgb2hsl(r,g,b){r/=255;g/=255;b/=255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b);let h,s,l=(mx+mn)/2;if(mx===mn)h=s=0;else{const d=mx-mn;s=l>.5?d/(2-mx-mn):d/(mx+mn);switch(mx){case r:h=((g-b)/d+(g<b?6:0))/6;break;case g:h=((b-r)/d+2)/6;break;case b:h=((r-g)/d+4)/6;break}}return[Math.round(h*360),Math.round(s*100),Math.round(l*100)]}
+function hsl2rgb(h,s,l){h/=360;s/=100;l/=100;let r,g,b;if(s===0)r=g=b=l;else{const q=l<.5?l*(1+s):l+s-l*s,p=2*l-q,f=(p,q,t)=>{if(t<0)t++;if(t>1)t--;return t<1/6?p+(q-p)*6*t:t<.5?q:t<2/3?p+(q-p)*(2/3-t)*6:p};r=f(p,q,h+1/3);g=f(p,q,h);b=f(p,q,h-1/3)}return[Math.round(r*255),Math.round(g*255),Math.round(b*255)]}
+function cDist(a,b){return Math.sqrt((a[0]-b[0])**2+(a[1]-b[1])**2+(a[2]-b[2])**2)}
+function lum(r,g,b){return.299*r+.587*g+.114*b}
+
+// Tabs
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  t.classList.add('active');$('p-'+t.dataset.t).classList.add('active');
+}));
+
+// === Color Names ===
+const CN=[['象牙白',255,255,240],['米白',250,235,215],['奶油黄',255,253,208],['鹅黄',255,246,143],['明黄',255,215,0],['姜黄',204,153,0],['琥珀',255,191,0],['焦糖',175,110,50],['棕褐',139,90,43],['咖啡',111,78,55],['巧克力',93,64,55],['赤陶',204,102,51],['珊瑚橘',255,127,80],['蜜桃粉',255,183,150],['胭脂红',200,60,60],['酒红',128,0,32],['枣红',140,30,30],['玫瑰粉',255,153,170],['淡粉',255,209,220],['樱花粉',255,183,197],['紫藤',180,150,200],['薰衣草',150,123,182],['丁香紫',200,162,200],['深紫',90,50,120],['靛蓝',0,65,106],['藏青',0,40,80],['宝蓝',0,71,171],['天蓝',135,206,235],['雾霾蓝',150,180,200],['湖蓝',70,160,180],['鸭绿',0,128,128],['翡翠绿',0,168,107],['橄榄绿',107,142,35],['苔绿',80,120,60],['墨绿',0,66,37],['薄荷绿',152,251,152],['鼠尾草绿',138,154,91],['卡其',195,176,145],['驼色',193,154,107],['燕麦',210,190,165],['大地棕',150,110,70],['石板灰',112,128,144],['烟灰',150,150,150],['炭灰',54,54,54],['纯黑',20,20,20],['暖灰',170,160,150],['冷灰',140,150,160],['纯白',255,255,255],['正红',230,30,30],['砖红',180,80,60],['金色',218,165,32],['铜色',184,115,51]];
+function cName(r,g,b){let m=1e9,n='';CN.forEach(c=>{const d=cDist([r,g,b],[c[1],c[2],c[3]]);if(d<m){m=d;n=c[0]}});return n}
+
+// === Scene Color ===
+const S={url:null,img:null,dc:[],sty:'自然清新',tp:'auto',sk:'n',dtp:null,outs:[]};
+function exCol(img,n){const c=$('wkCv'),sz=200;c.width=sz;c.height=sz;const ctx=c.getContext('2d');ctx.drawImage(img,0,0,sz,sz);const d=ctx.getImageData(0,0,sz,sz).data;let px=[];for(let i=0;i<d.length;i+=4){if(d[i+3]<128)continue;px.push([d[i],d[i+1],d[i+2]])}
+function mc(p,dp){if(dp===0||!p.length){const a=p.reduce((a,x)=>[a[0]+x[0],a[1]+x[1],a[2]+x[2]],[0,0,0]),l=p.length||1;return[{r:[Math.round(a[0]/l),Math.round(a[1]/l),Math.round(a[2]/l)],c:p.length}]}let rn=[0,1,2].map(ch=>{const v=p.map(x=>x[ch]);return Math.max(...v)-Math.min(...v)});const ch=rn.indexOf(Math.max(...rn));p.sort((a,b)=>a[ch]-b[ch]);const m=p.length>>1;return[...mc(p.slice(0,m),dp-1),...mc(p.slice(m),dp-1)]}
+let raw=mc(px,Math.ceil(Math.log2(n+2)));const tot=raw.reduce((s,x)=>s+x.c,0);const mg=[];const us=new Set();
+for(let i=0;i<raw.length;i++){if(us.has(i))continue;let g=[raw[i]],ct=raw[i].c;us.add(i);for(let j=i+1;j<raw.length;j++){if(us.has(j))continue;if(cDist(raw[i].r,raw[j].r)<35){g.push(raw[j]);ct+=raw[j].c;us.add(j)}}const a=g.reduce((a,x)=>[a[0]+x.r[0]*x.c,a[1]+x.r[1]*x.c,a[2]+x.r[2]*x.c],[0,0,0]);mg.push({r:a.map(v=>Math.round(v/ct)),c:ct})}
+mg.sort((a,b)=>b.c-a.c);return mg.slice(0,n).map(x=>({rgb:x.r,hx:hex(...x.r),hsl:rgb2hsl(...x.r),nm:cName(...x.r),pct:Math.round(x.c/tot*100)}))}
+
+function detTP(c){const aL=c.reduce((s,x)=>s+lum(...x.rgb)*x.pct,0)/100,aW=c.reduce((s,x)=>s+(x.rgb[0]-x.rgb[2])*x.pct,0)/100,aS=c.reduce((s,x)=>s+x.hsl[1]*x.pct,0)/100;if(aL<60)return{id:'blue',l:'蓝调/夜景'};if(aL<100&&aW<-10)return{id:'overcast',l:'阴天柔光'};if(aW>30&&aL>120)return{id:'golden',l:'黄金时段'};if(aL>180)return{id:'midday',l:'正午强光'};if(aS<20)return{id:'overcast',l:'阴天柔光'};return{id:'golden',l:'自然光'}}
+function clL(b,sk){return sk==='w'?Math.min(b+5,92):sk==='c'?Math.min(b+3,90):sk==='t'?Math.max(b-5,30):sk==='d'?Math.max(b-10,25):b}
+
+// Garment database: map color name to concrete clothing items per style
+const GARMENTS={
+  '自然清新':{top:['棉麻衬衫','亚麻T恤','针织背心','泡泡袖上衣'],bot:['阔腿裤','A字半裙','工装裤','棉麻长裤'],acc:['草编帽','帆布包','丝巾','编织手链'],dress:['碎花茶歇裙','亚麻连衣裙','背带裙','衬衫裙']},
+  '复古胶片':{top:['灯芯绒衬衫','V领针织衫','复古polo衫','蕾丝衬衣'],bot:['高腰直筒裤','百褶裙','A字牛仔裙','灯芯绒长裤'],acc:['贝雷帽','复古耳环','链条包','皮带'],dress:['碎花连衣裙','针织裙','法式方领裙','灯芯绒背带裙']},
+  '日系':{top:['白色T恤','条纹衬衫','宽松卫衣','纯色polo'],bot:['直筒牛仔裤','棉布长裙','百褶短裙','工装短裤'],acc:['渔夫帽','帆布袋','发带','素色围巾'],dress:['白色连衣裙','背心长裙','衬衫裙','针织连衣裙']},
+  '情绪暗调':{top:['丝绒衬衫','皮衣','高领打底','西装外套'],bot:['皮裤','阔腿西裤','丝绒半裙','高腰直筒裤'],acc:['金属耳饰','链条项链','皮手套','贝雷帽'],dress:['丝绒吊带裙','黑色slip dress','西装连体裤','长风衣']},
+  '新中式':{top:['盘扣上衣','改良旗袍上衣','对襟衫','刺绣衬衫'],bot:['阔腿汉服裤','马面裙','百褶宫裙','织锦长裤'],acc:['玉佩','团扇','发簪','绣花手包'],dress:['改良旗袍','新中式连衣裙','盘扣长裙','刺绣茶服']},
+  '韩系':{top:['oversize西装','纯色T恤','短款卫衣','方领上衣'],bot:['直筒牛仔裤','西装裤','百褶裙','高腰短裤'],acc:['棒球帽','极简耳钉','链条小包','墨镜'],dress:['衬衫裙','针织连衣裙','西装裙套装','一字肩连衣裙']}
+};
+function pickGarment(sty,type,seed){const pool=GARMENTS[sty]||GARMENTS['自然清新'];const items=pool[type]||pool.top;return items[seed%items.length]}
+
+function genOuts(dc,sty,sk){const[h,s]=dc[0].hsl,sc=[],seed=Math.abs(h*7+dc[0].rgb[0]+dc[0].rgb[1]*3);
+sc.push({nm:'互补撞色',tp:'comp',tl:'互补配色',ds:'与场景形成对比，人物更突出',cs:[
+  {r:hsl2rgb((h+180)%360,Math.min(s+5,80),clL(55,sk)),rl:'上装',gm:pickGarment(sty,'top',seed)},
+  {r:hsl2rgb((h+200)%360,Math.min(s-10,60),clL(70,sk)),rl:'下装',gm:pickGarment(sty,'bot',seed+1)},
+  {r:hsl2rgb(h,Math.max(s-25,15),clL(85,sk)),rl:'配饰',gm:pickGarment(sty,'acc',seed+2)}],hm:85});
+sc.push({nm:'同色系融合',tp:'ana',tl:'邻近配色',ds:'与场景和谐统一，营造氛围感',cs:[
+  {r:hsl2rgb((h+30)%360,Math.min(s-5,50),clL(60,sk)),rl:'主件',gm:pickGarment(sty,'dress',seed+3)},
+  {r:hsl2rgb((h+340)%360,Math.max(s-15,20),clL(72,sk)),rl:'内搭',gm:pickGarment(sty,'top',seed+4)},
+  {r:hsl2rgb(h,Math.max(s-30,10),clL(90,sk)),rl:'配饰',gm:pickGarment(sty,'acc',seed+5)}],hm:95});
+sc.push({nm:'柔和对比',tp:'spl',tl:'分裂互补',ds:'有对比又不突兀，适合复古/情绪',cs:[
+  {r:hsl2rgb((h+150)%360,Math.min(s,55),clL(58,sk)),rl:'上装',gm:pickGarment(sty,'top',seed+6)},
+  {r:hsl2rgb((h+210)%360,Math.min(s-10,45),clL(65,sk)),rl:'下装',gm:pickGarment(sty,'bot',seed+7)},
+  {r:hsl2rgb(h,Math.max(s-20,15),clL(80,sk)),rl:'外搭',gm:pickGarment(sty,'dress',seed+8)}],hm:90});
+sc.forEach(s=>{s.cs=s.cs.map(c=>{let[ch,cs,cl]=rgb2hsl(...c.r);if(sty==='复古胶片'){cs=Math.max(cs-12,10);cl=Math.min(cl+5,80)}if(sty==='情绪暗调'){cl=Math.max(cl-15,20)}if(sty==='日系'){cl=Math.min(cl+10,90);cs=Math.max(cs-15,10)}if(sty==='韩系'){cs=Math.max(cs-10,12);cl=Math.min(cl+8,85)}if(sty==='新中式')cs=Math.min(cs+5,70);const a=hsl2rgb(ch,cs,cl);return{...c,r:a,hx:hex(...a),nm:cName(...a)}})});return sc}
+
+// === Avoid Colors ===
+function genAvoidColors(dc){
+  const avoids=[];
+  const mainH=dc[0].hsl[0],mainS=dc[0].hsl[1];
+  // 1. Same hue + similar saturation = "隐身"
+  dc.forEach(c=>{
+    if(c.pct>=15){
+      const [h,s,l]=c.hsl;
+      avoids.push({rgb:c.rgb,hx:c.hx,nm:c.nm,reason:'与场景主色过近，人物会"隐身"融入背景'});
+    }
+  });
+  // 2. Neon / fluorescent colors
+  avoids.push({rgb:[0,255,0],hx:'#00ff00',nm:'荧光绿',reason:'荧光色在任何自然场景中都极不协调'});
+  avoids.push({rgb:[255,0,255],hx:'#ff00ff',nm:'荧光紫',reason:'荧光色刺眼，后期难以调和'});
+  // 3. Scene-specific: green scene + green clothes
+  if(mainH>=80&&mainH<=160&&mainS>25){
+    avoids.push({rgb:hsl2rgb(mainH,mainS,50),hx:hex(...hsl2rgb(mainH,mainS,50)),nm:'同色调绿',reason:'绿色场景穿绿色="绿幕效应"，人会消失'});
+  }
+  // 4. Very high saturation clash
+  if(mainS>40){
+    const clashH=(mainH+90)%360;
+    const clashRgb=hsl2rgb(clashH,90,50);
+    avoids.push({rgb:clashRgb,hx:hex(...clashRgb),nm:cName(...clashRgb)+'(高饱和)',reason:'与场景高饱和色正交，画面会非常杂乱'});
+  }
+  // Dedupe by proximity
+  const unique=[];
+  avoids.forEach(a=>{if(!unique.some(u=>cDist(u.rgb,a.rgb)<50))unique.push(a)});
+  return unique.slice(0,5);
+}
+
+// === Silhouette Preview ===
+function drawSilhouette(cv,sceneImg,topColor,botColor,label){
+  const W=cv.width,H=cv.height;const ctx=cv.getContext('2d');
+  // Draw scene as background
+  const sc=Math.max(W/sceneImg.width,H/sceneImg.height);
+  const sw=W/sc,sh=H/sc,sx=(sceneImg.width-sw)/2,sy=(sceneImg.height-sh)/2;
+  ctx.drawImage(sceneImg,sx,sy,sw,sh,0,0,W,H);
+  // Slight dark overlay
+  ctx.fillStyle='rgba(0,0,0,0.15)';ctx.fillRect(0,0,W,H);
+  // Draw human silhouette (simplified)
+  const cx=W*0.5,bY=H*0.92;
+  ctx.save();
+  // Head
+  const headR=W*0.065;const headY=bY-H*0.7;
+  ctx.fillStyle='rgba(200,170,150,0.85)';
+  ctx.beginPath();ctx.arc(cx,headY,headR,0,Math.PI*2);ctx.fill();
+  // Neck
+  ctx.fillRect(cx-headR*0.35,headY+headR*0.8,headR*0.7,headR*0.5);
+  // Upper body (top color)
+  ctx.fillStyle=topColor;
+  ctx.beginPath();
+  const shoulderW=W*0.2,torsoH=H*0.22;
+  const torsoY=headY+headR*1.2;
+  ctx.moveTo(cx-shoulderW,torsoY);
+  ctx.quadraticCurveTo(cx-shoulderW*1.1,torsoY-headR*0.3,cx-headR*0.5,torsoY-headR*0.3);
+  ctx.lineTo(cx+headR*0.5,torsoY-headR*0.3);
+  ctx.quadraticCurveTo(cx+shoulderW*1.1,torsoY-headR*0.3,cx+shoulderW,torsoY);
+  ctx.lineTo(cx+shoulderW*0.85,torsoY+torsoH);
+  ctx.lineTo(cx-shoulderW*0.85,torsoY+torsoH);
+  ctx.closePath();ctx.fill();
+  // Arms
+  ctx.lineWidth=W*0.035;ctx.strokeStyle=topColor;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(cx-shoulderW,torsoY+2);ctx.quadraticCurveTo(cx-shoulderW*1.3,torsoY+torsoH*0.7,cx-shoulderW*1.1,torsoY+torsoH*1.2);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(cx+shoulderW,torsoY+2);ctx.quadraticCurveTo(cx+shoulderW*1.3,torsoY+torsoH*0.7,cx+shoulderW*1.1,torsoY+torsoH*1.2);ctx.stroke();
+  // Hands
+  ctx.fillStyle='rgba(200,170,150,0.85)';
+  ctx.beginPath();ctx.arc(cx-shoulderW*1.1,torsoY+torsoH*1.2,W*0.022,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(cx+shoulderW*1.1,torsoY+torsoH*1.2,W*0.022,0,Math.PI*2);ctx.fill();
+  // Lower body (bottom color)
+  ctx.fillStyle=botColor;
+  const legY=torsoY+torsoH;const legH=H*0.28;
+  ctx.beginPath();
+  ctx.moveTo(cx-shoulderW*0.85,legY);
+  ctx.lineTo(cx+shoulderW*0.85,legY);
+  ctx.lineTo(cx+shoulderW*0.5,legY+legH);
+  ctx.lineTo(cx+W*0.01,legY+legH*0.3);
+  ctx.lineTo(cx-shoulderW*0.5,legY+legH);
+  ctx.closePath();ctx.fill();
+  // Feet
+  ctx.fillStyle='#2a2a2a';
+  ctx.beginPath();ctx.ellipse(cx-shoulderW*0.4,bY,W*0.04,W*0.015,0,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.ellipse(cx+shoulderW*0.4,bY,W*0.04,W*0.015,0,0,Math.PI*2);ctx.fill();
+  // Hair
+  ctx.fillStyle='#2a1a0a';
+  ctx.beginPath();ctx.arc(cx,headY-headR*0.1,headR*1.1,Math.PI,0);ctx.fill();
+  ctx.beginPath();ctx.ellipse(cx,headY-headR*0.2,headR*1.15,headR*0.5,0,Math.PI,0);ctx.fill();
+  ctx.restore();
+}
+
+function genTips(c,tp,sty){const t=[];const w=c[0].rgb[0]-c[0].rgb[2];const aS=c.reduce((s,x)=>s+x.hsl[1]*x.pct,0)/100;
+t.push({i:'🌤️',tl:'光线：'+tp.l,tx:tp.id==='golden'?'暖光环境，大光圈逆光拍摄效果佳':tp.id==='overcast'?'柔光环境，适合人像无需补光':tp.id==='midday'?'光线硬，找阴影或用柔光板':'低光环境，注意提高ISO或用三脚架'});
+t.push({i:'🎨',tl:'色温：'+(w>20?'偏暖':w<-20?'偏冷':'中性'),tx:w>20?'暖场景搭冷色服装可形成对比，搭暖色更协调':w<-20?'冷场景搭暖色服装突出人物':'中性色温服装选择空间大'});
+t.push({i:'💡',tl:'饱和度：'+(aS>50?'浓郁':aS>25?'适中':'素淡'),tx:aS>50?'服装建议低饱和，避免画面杂':aS>25?'服装可略带色彩':'素淡场景用服装带入点缀色'});
+const sm={自然清新:'棉麻浅色系，帽子草编包加分',复古胶片:'碎花裙针织衫，避免荧光色',日系:'白米淡蓝为主，棉麻材质',情绪暗调:'深色+一个亮点缀，皮质丝绒增质感',新中式:'改良旗袍盘扣，黛青绛红鹅黄',韩系:'低饱和高明度，纯色T+直筒裤'};
+if(sm[sty])t.push({i:'✨',tl:'风格：'+sty,tx:sm[sty]});return t}
+
+// Scene DOM
+const sDZ=$('sDZ'),sFI=$('sFI');
+sDZ.addEventListener('click',()=>sFI.click());
+sDZ.addEventListener('dragover',e=>{e.preventDefault();sDZ.classList.add('over')});
+sDZ.addEventListener('dragleave',()=>sDZ.classList.remove('over'));
+sDZ.addEventListener('drop',e=>{e.preventDefault();sDZ.classList.remove('over');e.dataTransfer.files[0]&&hSF(e.dataTransfer.files[0])});
+sFI.addEventListener('change',e=>e.target.files[0]&&hSF(e.target.files[0]));
+$('sRB').addEventListener('click',()=>sFI.click());
+document.querySelectorAll('#styleTags .tag').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('#styleTags .tag').forEach(x=>x.classList.remove('active'));b.classList.add('active');S.sty=b.dataset.s;if(S.img)regenAndRender()}));
+$('timeSelect').addEventListener('change',e=>{S.tp=e.target.value;if(S.img)regenAndRender()});
+$('skinTone').addEventListener('change',e=>{S.sk=e.target.value;if(S.img)regenAndRender()});
+
+function hSF(f){if(!f.type.startsWith('image/'))return;const r=new FileReader();r.onload=e=>{const i=new Image();i.onload=()=>{S.url=e.target.result;S.img=i;anS()};i.src=e.target.result};r.readAsDataURL(f)}
+function anS(){S.dc=exCol(S.img,6);S.dtp=detTP(S.dc);regenAndRender()}
+function regenAndRender(){S.outs=genOuts(S.dc,S.sty,S.sk);rnS()}
+function rnS(){const h=!!S.img;sDZ.style.display=h?'none':'block';$('sR').style.display=h?'block':'none';if(!h)return;
+$('sImg').src=S.url;
+$('pStrip').innerHTML=S.dc.map(c=>`<div class="sw" style="background:${c.hx};flex:${c.pct}" onclick="copyColor('${c.hx}')"><span class="lb">${c.hx}</span></div>`).join('');
+$('colorDL').innerHTML=S.dc.map(c=>`<div class="cdet" onclick="copyColor('${c.hx}')"><div class="cdot" style="background:${c.hx}"></div><div class="cinf"><span class="hx">${c.hx}</span><span class="nm">${c.nm}</span><span class="pc">${c.pct}%</span></div></div>`).join('');
+const tp=S.tp==='auto'?S.dtp:{l:$('timeSelect').selectedOptions[0].text};const aS=S.dc.reduce((s,c)=>s+c.hsl[1]*c.pct,0)/100;const w=S.dc[0].rgb[0]-S.dc[0].rgb[2];
+$('sTags').innerHTML=`<div class="atag">光线 <b>${tp.l}</b></div><div class="atag">色温 <b>${w>20?'暖':w<-20?'冷':'中性'}</b></div><div class="atag">饱和度 <b>${aS>50?'高':aS>25?'中':'低'}</b></div><div class="atag">主色 <b>${S.dc[0].nm}</b></div>`;
+$('oGrid').innerHTML=S.outs.map(s=>`<div class="ocard"><div class="htype ht-${s.tp}">${s.tl}</div><h3>${s.nm}</h3><p class="odesc">${s.ds}</p><div class="ocolors">${s.cs.map(c=>`<div class="oci"><div class="ochip" style="background:${c.hx}" onclick="copyColor('${c.hx}')"></div><span class="ocl">${c.hx}</span><span class="ocr">${c.nm}</span><span class="garment-tag">${c.gm}</span><span class="ocr">${c.rl}</span></div>`).join('')}</div><div class="hbar"><div class="hfill" style="width:${s.hm}%"></div></div><div class="hlbl"><span>和谐度</span><span>${s.hm}%</span></div></div>`).join('');
+// Avoid colors
+const avoids=genAvoidColors(S.dc);
+$('avoidList').innerHTML=avoids.map(a=>`<div class="avoid-item"><div class="avoid-chip" style="background:${a.hx}"></div><div class="avoid-info"><span class="avoid-name">${a.nm} ${a.hx}</span><span class="avoid-reason">${a.reason}</span></div></div>`).join('');
+// Simulation preview
+const simG=$('simGrid');simG.innerHTML='';
+S.outs.forEach(s=>{const card=document.createElement('div');card.className='sim-card';
+const cv=document.createElement('canvas');cv.width=400;cv.height=560;
+drawSilhouette(cv,S.img,s.cs[0].hx,s.cs.length>1?s.cs[1].hx:s.cs[0].hx,s.nm);
+card.appendChild(cv);const lb=document.createElement('div');lb.className='sim-label';lb.textContent=s.nm;card.appendChild(lb);simG.appendChild(card)});
+const tpI=S.tp==='auto'?S.dtp:S.dtp;const tips=genTips(S.dc,tpI,S.sty);
+$('tipG').innerHTML=tips.map(t=>`<div class="tcard"><div class="ti">${t.i}</div><h4>${t.tl}</h4><p>${t.tx}</p></div>`).join('')}
+$('sClr').addEventListener('click',()=>{S.url=S.img=null;S.dc=[];S.outs=[];sFI.value='';rnS()});
+$('expBtn').addEventListener('click',()=>{if(!S.img)return toast('请先上传');toast('导出中...');setTimeout(()=>{
+const W=1920,H=1440,P=40,R=12;
+const cv=$('exCv');cv.width=W;cv.height=H;const ctx=cv.getContext('2d');
+
+// Background
+ctx.fillStyle='#0a0a0a';ctx.fillRect(0,0,W,H);
+
+// Title bar
+ctx.fillStyle='#f0c674';ctx.font='600 28px sans-serif';ctx.fillText('Scene Color Advisor',P,46);
+ctx.fillStyle='#666';ctx.font='14px sans-serif';
+ctx.fillText(S.sty+' · '+new Date().toLocaleDateString('zh-CN'),P,70);
+
+// === Left Column: Scene + Palette + Avoid ===
+const iW=520,iH=360;
+ctx.save();ctx.beginPath();ctx.roundRect(P,96,iW,iH,R);ctx.clip();
+const sc=Math.max(iW/S.img.width,iH/S.img.height);
+ctx.drawImage(S.img,(S.img.width-iW/sc)/2,(S.img.height-iH/sc)/2,iW/sc,iH/sc,P,96,iW,iH);
+ctx.restore();
+
+// Palette bar
+let px=P;const bY=472,bH=40;
+const tP=S.dc.reduce((s,c)=>s+c.pct,0);
+S.dc.forEach(c=>{const w=(c.pct/tP)*iW;ctx.fillStyle=c.hx;ctx.beginPath();ctx.roundRect(px,bY,w-3,bH,6);ctx.fill();
+ctx.fillStyle=lum(...c.rgb)>128?'rgba(0,0,0,.6)':'rgba(255,255,255,.7)';ctx.font='10px monospace';ctx.textAlign='center';
+if(w>36)ctx.fillText(c.hx,px+w/2,bY+bH/2+3);ctx.textAlign='left';px+=w});
+
+// Color names list
+let cy=530;ctx.font='12px sans-serif';
+S.dc.forEach(c=>{ctx.fillStyle=c.hx;ctx.beginPath();ctx.roundRect(P,cy,18,18,4);ctx.fill();
+ctx.fillStyle='#aaa';ctx.fillText(c.nm+'  '+c.hx+'  '+c.pct+'%',P+26,cy+13);cy+=24});
+
+// Scene analysis tags
+cy+=8;ctx.fillStyle='#555';ctx.font='10px sans-serif';
+const tp=S.tp==='auto'?S.dtp:{l:'—'};const aS=S.dc.reduce((s,c)=>s+c.hsl[1]*c.pct,0)/100;const wm=S.dc[0].rgb[0]-S.dc[0].rgb[2];
+const tags=['光线:'+tp.l,'色温:'+(wm>20?'暖':wm<-20?'冷':'中性'),'饱和度:'+(aS>50?'高':aS>25?'中':'低'),'风格:'+S.sty];
+let tx=P;tags.forEach(t=>{const tw=ctx.measureText(t).width+16;
+ctx.fillStyle='#151515';ctx.beginPath();ctx.roundRect(tx,cy,tw,20,10);ctx.fill();
+ctx.fillStyle='#aaa';ctx.fillText(t,tx+8,cy+14);tx+=tw+6});
+
+// === Avoid Colors ===
+cy+=40;ctx.fillStyle='#555';ctx.font='10px sans-serif';ctx.fillText('⚠ 避坑色',P,cy);cy+=14;
+const avoids=genAvoidColors(S.dc);
+avoids.slice(0,4).forEach(a=>{ctx.fillStyle=a.hx;ctx.beginPath();ctx.roundRect(P,cy,22,22,5);ctx.fill();
+ctx.fillStyle='#e57373';ctx.font='11px sans-serif';ctx.fillText(a.nm,P+30,cy+10);
+ctx.fillStyle='#666';ctx.font='10px sans-serif';ctx.fillText(a.reason,P+30,cy+22);cy+=32});
+
+// === Right Column: Outfit Schemes ===
+const sX=600;
+ctx.fillStyle='#555';ctx.font='10px sans-serif';ctx.fillText('服装配色推荐',sX,112);
+
+S.outs.forEach((s,i)=>{
+const sy=130+i*220;
+// Scheme label
+ctx.fillStyle='#ddd';ctx.font='500 15px sans-serif';ctx.fillText(s.nm,sX,sy);
+ctx.fillStyle='#666';ctx.font='12px sans-serif';ctx.fillText(s.tl,sX+ctx.measureText(s.nm).width+10,sy);
+
+// Color chips with garment names
+s.cs.forEach((c,ci)=>{
+  const cx=sX+ci*130;
+  ctx.fillStyle=c.hx;ctx.beginPath();ctx.roundRect(cx,sy+14,80,80,10);ctx.fill();
+  ctx.fillStyle='#ccc';ctx.font='10px monospace';ctx.fillText(c.hx,cx,sy+110);
+  ctx.fillStyle='#999';ctx.font='10px sans-serif';ctx.fillText(c.nm,cx,sy+124);
+  ctx.fillStyle='#666';ctx.fillText(c.gm+' · '+c.rl,cx,sy+138);
+});
+
+// Harmony bar
+ctx.fillStyle='#1a1a1a';ctx.beginPath();ctx.roundRect(sX,sy+152,340,5,3);ctx.fill();
+const grd=ctx.createLinearGradient(sX,0,sX+340*s.hm/100,0);grd.addColorStop(0,'#f0c674');grd.addColorStop(1,'#81c784');
+ctx.fillStyle=grd;ctx.beginPath();ctx.roundRect(sX,sy+152,340*s.hm/100,5,3);ctx.fill();
+ctx.fillStyle='#555';ctx.font='9px sans-serif';ctx.fillText('和谐度 '+s.hm+'%',sX+348,sy+158);
+});
+
+// === Simulation Previews ===
+const simY=810;
+ctx.fillStyle='#555';ctx.font='10px sans-serif';ctx.fillText('场景模拟预览',P,simY);
+
+S.outs.forEach((s,i)=>{
+const sx=P+i*220;
+const simCv=document.createElement('canvas');simCv.width=200;simCv.height=280;
+drawSilhouette(simCv,S.img,s.cs[0].hx,s.cs.length>1?s.cs[1].hx:s.cs[0].hx,s.nm);
+ctx.save();ctx.beginPath();ctx.roundRect(sx,simY+16,200,280,R);ctx.clip();
+ctx.drawImage(simCv,sx,simY+16);ctx.restore();
+// Label
+ctx.fillStyle='rgba(0,0,0,.6)';ctx.beginPath();ctx.roundRect(sx,simY+268,200,28,{upperLeft:0,upperRight:0,lowerLeft:R,lowerRight:R});ctx.fill();
+ctx.fillStyle='#ccc';ctx.font='11px sans-serif';ctx.textAlign='center';ctx.fillText(s.nm,sx+100,simY+286);ctx.textAlign='left';
+});
+
+// === Shooting Tips ===
+const tipY=1120;
+ctx.fillStyle='#555';ctx.font='10px sans-serif';ctx.fillText('拍摄建议',P,tipY);
+
+const tpI=S.tp==='auto'?S.dtp:S.dtp;const tips=genTips(S.dc,tpI,S.sty);
+tips.forEach((t,i)=>{
+const ttx=P+(i%2)*460;const tty=tipY+16+Math.floor(i/2)*90;
+ctx.fillStyle='#111';ctx.beginPath();ctx.roundRect(ttx,tty,440,78,10);ctx.fill();
+ctx.fillStyle='#ddd';ctx.font='500 12px sans-serif';ctx.fillText(t.i+' '+t.tl,ttx+14,tty+22);
+ctx.fillStyle='#888';ctx.font='11px sans-serif';
+// Word wrap
+const maxTW=412;let line='',ly=tty+42;
+for(const ch of t.tx){if(ctx.measureText(line+ch).width>maxTW){ctx.fillText(line,ttx+14,ly);line=ch;ly+=16}else line+=ch}
+if(line)ctx.fillText(line,ttx+14,ly);
+});
+
+// Watermark
+ctx.fillStyle='#1a1a1a';ctx.font='11px sans-serif';ctx.textAlign='right';
+ctx.fillText('Generated by Photo Toolbox · Scene Color Advisor',W-P,H-16);ctx.textAlign='left';
+
+// Download
+const a=document.createElement('a');a.download='scene-color-report-'+Date.now()+'.png';a.href=cv.toDataURL('image/png');a.click();toast('已导出')
+},100)});
+
+// === DOF ===
+function calcDOF(){const f=+$('dF').value,N=+$('dA').value,d=+$('dD').value*1000,sen=+$('dS').value,CoC=sen/1500,H=f*f/(N*CoC)+f,Dn=d*(H-f)/(H+d-2*f),Df=d>=H?1/0:d*(H-f)/(H-d),nr=Math.max(Dn,0),dof=Df===1/0?1/0:Df-nr;
+const fm=v=>v===1/0?'∞':v>=1e4?(v/1e3).toFixed(1)+'m':v>=1e3?(v/1e3).toFixed(2)+'m':Math.round(v)+'mm';
+$('dR').textContent=fm(dof);$('dN').textContent=fm(nr);$('dFr').textContent=fm(Df);$('dH').textContent=fm(H);
+const vis=$('dV'),vw=vis.offsetWidth||400,mx=Df===1/0?d*3:Math.max(Df*1.3,d*1.5);
+$('dB').style.left=(nr/mx*vw)+'px';$('dB').style.width=((Df===1/0?vw:Df/mx*vw)-nr/mx*vw)+'px';$('dFL').style.left=(d/mx*vw)+'px'}
+['dF','dA','dD','dS'].forEach(id=>$(id).addEventListener('input',calcDOF));calcDOF();
+
+// === Golden Hour ===
+$('gDt').value=new Date().toISOString().split('T')[0];
+function calcSun(){const lat=+$('gLa').value,lng=+$('gLn').value,tz=+$('gTz').value,dt=new Date($('gDt').value);
+const toR=d=>d*Math.PI/180,toD=r=>r*180/Math.PI,dy=Math.floor((dt-new Date(dt.getFullYear(),0,0))/864e5),lH=lng/15;
+function cT(t,rise){const M=.9856*t-3.289,Mr=toR(M);let L=M+1.916*Math.sin(Mr)+.02*Math.sin(2*Mr)+282.634;L=((L%360)+360)%360;let RA=toD(Math.atan(.91764*Math.tan(toR(L))));RA=((RA%360)+360)%360;RA+=Math.floor(L/90)*90-Math.floor(RA/90)*90;RA/=15;const sD=.39782*Math.sin(toR(L)),cD=Math.cos(Math.asin(sD));
+return z=>{const cH=(Math.cos(toR(z))-sD*Math.sin(toR(lat)))/(cD*Math.cos(toR(lat)));if(Math.abs(cH)>1)return null;let H=toD(Math.acos(cH));if(rise)H=360-H;H/=15;let T=((H+RA-.06571*t-6.622-lH)%24+24)%24;return(T+tz+24)%24}}
+const rc=cT(dy+(6-lH)/24,true),sc=cT(dy+(18-lH)/24,false);
+const fmt=h=>{if(h==null)return'--:--';const hh=Math.floor(h),mm=Math.round((h-hh)*60);return String(hh).padStart(2,'0')+':'+String(mm).padStart(2,'0')};
+const sr=rc(90.833),ss=sc(90.833),gme=rc(84),ges=sc(84),bms=rc(98),bme=rc(96),bes=sc(96),bee=sc(98);
+$('gCards').innerHTML=[{i:'🌅',l:'日出',t:fmt(sr)},{i:'🌇',l:'日落',t:fmt(ss)},{i:'✨',l:'晨间黄金结束',t:fmt(gme)},{i:'🌆',l:'傍晚黄金开始',t:fmt(ges)},{i:'🔵',l:'晨蓝调开始',t:fmt(bms)},{i:'🔵',l:'晚蓝调结束',t:fmt(bee)}].map(c=>`<div class="ghc"><div class="gi">${c.i}</div><div class="gl">${c.l}</div><div class="gt">${c.t}</div></div>`).join('');
+const segs=[[0,bms||4,'#0a0a2e','夜'],[bms||4,bme||5,'#1a2a5e','蓝调'],[bme||5,sr||6,'#3a3a6e','曙光'],[sr||6,gme||7,'#d4a040','黄金'],[gme||7,ges||17,'rgba(110,198,255,.15)','白天'],[ges||17,ss||18,'#d4a040','黄金'],[ss||18,bes||19,'#4a3060','余晖'],[bes||19,bee||19.5,'#1a2a5e','蓝调'],[bee||19.5,24,'#0a0a2e','夜']];
+$('gTL').innerHTML=segs.map(s=>{const l=(s[0]/24)*100,w=((s[1]-s[0])/24)*100;return w<.3?'':`<div class="tls" style="left:${l}%;width:${w}%;background:${s[2]}"><span class="sl">${w>3?s[3]:''}</span></div>`}).join('');
+$('gTM').innerHTML=Array.from({length:13},(_,i)=>`<span>${String(i*2).padStart(2,'0')}:00</span>`).join('')}
+$('gCalc').addEventListener('click',calcSun);
+$('gLoc').addEventListener('click',()=>{navigator.geolocation?navigator.geolocation.getCurrentPosition(p=>{$('gLa').value=p.coords.latitude.toFixed(2);$('gLn').value=p.coords.longitude.toFixed(2);calcSun();toast('已定位')},()=>toast('定位失败')):toast('不支持定位')});
+document.querySelectorAll('[data-c]').forEach(b=>b.addEventListener('click',()=>{const[la,ln,tz]=b.dataset.c.split(',');$('gLa').value=la;$('gLn').value=ln;$('gTz').value=tz;calcSun()}));
+calcSun();
+
+// === Composition ===
+let cpT='thirds',cpI=null;
+const cDZ=$('cDZ'),cFI=$('cFI');
+cDZ.addEventListener('click',()=>cFI.click());
+cDZ.addEventListener('dragover',e=>{e.preventDefault();cDZ.classList.add('over')});
+cDZ.addEventListener('dragleave',()=>cDZ.classList.remove('over'));
+cDZ.addEventListener('drop',e=>{e.preventDefault();cDZ.classList.remove('over');e.dataTransfer.files[0]&&hCF(e.dataTransfer.files[0])});
+cFI.addEventListener('change',e=>e.target.files[0]&&hCF(e.target.files[0]));
+document.querySelectorAll('#compCtrl .tag').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('#compCtrl .tag').forEach(x=>x.classList.remove('active'));b.classList.add('active');cpT=b.dataset.cp;drC()}));
+['cCol','cOp','cLw'].forEach(id=>$(id).addEventListener('input',drC));
+
+let compExif=null;
+function hCF(f){if(!f.type.startsWith('image/'))return;compFileSize=f.size;
+// Read as DataURL for display
+const r=new FileReader();r.onload=e=>{const i=new Image();i.onload=()=>{cpI=i;$('cImg').src=e.target.result;cDZ.style.display='none';$('cPV').style.display='block';
+// Also read as ArrayBuffer for EXIF
+const r2=new FileReader();r2.onload=e2=>{compExif=parseExif(e2.target.result);setTimeout(()=>{drC();drawHistogram();showImageInfo()},50)};r2.readAsArrayBuffer(f);
+};i.src=e.target.result};r.readAsDataURL(f)}
+function drC(){if(!cpI)return;const el=$('cImg'),cv=$('cCv'),w=el.clientWidth,h=el.clientHeight;cv.width=w;cv.height=h;const ctx=cv.getContext('2d');ctx.clearRect(0,0,w,h);ctx.strokeStyle=$('cCol').value;ctx.globalAlpha=+$('cOp').value/100;ctx.lineWidth=+$('cLw').value;
+if(cpT==='thirds'){for(let i=1;i<3;i++){ctx.beginPath();ctx.moveTo(w*i/3,0);ctx.lineTo(w*i/3,h);ctx.stroke();ctx.beginPath();ctx.moveTo(0,h*i/3);ctx.lineTo(w,h*i/3);ctx.stroke()}ctx.globalAlpha=ctx.globalAlpha*1.5;ctx.fillStyle=$('cCol').value;for(let i=1;i<3;i++)for(let j=1;j<3;j++){ctx.beginPath();ctx.arc(w*i/3,h*j/3,3,0,Math.PI*2);ctx.fill()}}
+else if(cpT==='golden'){const p=.618;[p,1-p].forEach(r=>{ctx.beginPath();ctx.moveTo(w*r,0);ctx.lineTo(w*r,h);ctx.stroke();ctx.beginPath();ctx.moveTo(0,h*r);ctx.lineTo(w,h*r);ctx.stroke()})}
+else if(cpT==='diag'){ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(w,h);ctx.stroke();ctx.beginPath();ctx.moveTo(w,0);ctx.lineTo(0,h);ctx.stroke()}
+else if(cpT==='spiral'){const p=.618;[p,1-p].forEach(r=>{ctx.beginPath();ctx.moveTo(w*r,0);ctx.lineTo(w*r,h);ctx.stroke();ctx.beginPath();ctx.moveTo(0,h*r);ctx.lineTo(w,h*r);ctx.stroke()});ctx.beginPath();let cx=w*p,cy=h*p,r=Math.min(w,h)*.5,a=0;for(let i=0;i<720;i++){const an=a*Math.PI/180,cr=r*Math.pow(.618,a/360);const x=cx+cr*Math.cos(an),y=cy+cr*Math.sin(an);i?ctx.lineTo(x,y):ctx.moveTo(x,y);a+=2}ctx.stroke()}
+else if(cpT==='tri'){ctx.beginPath();ctx.moveTo(w/2,0);ctx.lineTo(0,h);ctx.lineTo(w,h);ctx.closePath();ctx.stroke()}
+else if(cpT==='center'){ctx.beginPath();ctx.moveTo(w/2,0);ctx.lineTo(w/2,h);ctx.stroke();ctx.beginPath();ctx.moveTo(0,h/2);ctx.lineTo(w,h/2);ctx.stroke();[.15,.3].forEach(r=>{ctx.beginPath();ctx.ellipse(w/2,h/2,w*r,h*r,0,0,Math.PI*2);ctx.stroke()})}
+ctx.globalAlpha=1;
+// Draw crop ratio overlay if active
+if(cropRatio){const[cw,ch]=cropRatio;const imgR=w/h,cropR=cw/ch;
+let rw,rh;if(cropR>imgR){rw=w;rh=w/cropR}else{rh=h;rw=h*cropR}
+const rx=(w-rw)/2,ry=(h-rh)/2;
+ctx.fillStyle='rgba(0,0,0,0.55)';
+ctx.fillRect(0,0,w,ry);ctx.fillRect(0,ry+rh,w,h-ry-rh);
+ctx.fillRect(0,ry,rx,rh);ctx.fillRect(rx+rw,ry,w-rx-rw,rh);
+ctx.strokeStyle='#fff';ctx.globalAlpha=0.7;ctx.lineWidth=1.5;ctx.setLineDash([6,4]);
+ctx.strokeRect(rx,ry,rw,rh);ctx.setLineDash([]);ctx.globalAlpha=1;
+}
+// Zebra stripes overlay
+drawZebra(ctx,w,h);
+}
+
+// === Histogram ===
+let histoCh='lum';
+let histoBins=null; // cache bins for tone analysis
+function drawHistogram(){
+if(!cpI)return;
+const cv=$('histoCv');const dpr=window.devicePixelRatio||1;
+const cw=cv.clientWidth||348,ch=cv.clientHeight||180;
+cv.width=cw*dpr;cv.height=ch*dpr;const ctx=cv.getContext('2d');
+ctx.scale(dpr,dpr);
+ctx.clearRect(0,0,cw,ch);
+
+const tmp=document.createElement('canvas');const sz=400;tmp.width=sz;tmp.height=sz;
+const tctx=tmp.getContext('2d');tctx.drawImage(cpI,0,0,sz,sz);
+const d=tctx.getImageData(0,0,sz,sz).data;
+
+const bins={r:new Uint32Array(256),g:new Uint32Array(256),b:new Uint32Array(256),lum:new Uint32Array(256)};
+for(let i=0;i<d.length;i+=4){
+bins.r[d[i]]++;bins.g[d[i+1]]++;bins.b[d[i+2]]++;
+bins.lum[Math.round(.299*d[i]+.587*d[i+1]+.114*d[i+2])]++;
+}
+histoBins={bins,data:d,total:d.length/4};
+
+function drawCh(data,color,alpha){
+const mx=Math.max(...data)||1;
+ctx.fillStyle=color;ctx.globalAlpha=alpha;
+ctx.beginPath();ctx.moveTo(0,ch);
+for(let i=0;i<256;i++){const x=i/255*cw,y=ch-data[i]/mx*(ch-6);ctx.lineTo(x,y)}
+ctx.lineTo(cw,ch);ctx.closePath();ctx.fill();ctx.globalAlpha=1;
+}
+
+// Background grid
+ctx.strokeStyle='#1a1a1a';ctx.lineWidth=0.5;
+for(let i=1;i<4;i++){ctx.beginPath();ctx.moveTo(cw*i/4,0);ctx.lineTo(cw*i/4,ch);ctx.stroke()}
+for(let i=1;i<3;i++){ctx.beginPath();ctx.moveTo(0,ch*i/3);ctx.lineTo(cw,ch*i/3);ctx.stroke()}
+
+if(histoCh==='all'){drawCh(bins.r,'#f06060',0.35);drawCh(bins.g,'#60c060',0.35);drawCh(bins.b,'#6080f0',0.35)}
+else if(histoCh==='r')drawCh(bins.r,'#f06060',0.7);
+else if(histoCh==='g')drawCh(bins.g,'#60c060',0.7);
+else if(histoCh==='b')drawCh(bins.b,'#6080f0',0.7);
+else drawCh(bins.lum,'#ccc',0.6);
+
+// Zone markers (Zone System: 0-III shadows, IV-VI midtones, VII-X highlights)
+ctx.fillStyle='#333';ctx.font='9px sans-serif';
+const zones=[{x:0,l:'暗部'},{x:85/255,l:'中间调'},{x:170/255,l:'高光'}];
+zones.forEach(z=>{ctx.fillStyle='rgba(255,255,255,0.08)';if(z.x>0){ctx.beginPath();ctx.moveTo(z.x*cw,0);ctx.lineTo(z.x*cw,ch);ctx.strokeStyle='#333';ctx.lineWidth=1;ctx.setLineDash([3,3]);ctx.stroke();ctx.setLineDash([])}});
+
+// Axis labels
+ctx.fillStyle='#555';ctx.font='10px sans-serif';
+ctx.textAlign='left';ctx.fillText('暗部',4,ch-4);
+ctx.textAlign='center';ctx.fillText('中间调',cw/2,ch-4);
+ctx.textAlign='right';ctx.fillText('高光',cw-4,ch-4);ctx.textAlign='left';
+
+// Exposure note
+const lumData=bins.lum;let totalPx=0,weightedSum=0;
+for(let i=0;i<256;i++){totalPx+=lumData[i];weightedSum+=lumData[i]*i}
+const avgLum=weightedSum/totalPx;
+const lowPct=lumData.slice(0,20).reduce((a,b)=>a+b,0)/totalPx*100;
+const highPct=lumData.slice(236).reduce((a,b)=>a+b,0)/totalPx*100;
+let expNote='',expColor='#888';
+if(lowPct>15){expNote='⚠ 暗部溢出 '+lowPct.toFixed(0)+'%';expColor='#e57373'}
+else if(highPct>15){expNote='⚠ 高光溢出 '+highPct.toFixed(0)+'%';expColor='#e57373'}
+else if(avgLum<80){expNote='偏暗 (均值'+Math.round(avgLum)+')';expColor='#aaa'}
+else if(avgLum>180){expNote='偏亮 (均值'+Math.round(avgLum)+')';expColor='#f0c674'}
+else{expNote='曝光良好 (均值'+Math.round(avgLum)+')';expColor='#81c784'}
+ctx.fillStyle=expColor;ctx.font='500 11px sans-serif';ctx.fillText(expNote,4,14);
+
+// Trigger analysis panels
+drawToneAnalysis();
+drawHueWheel();
+drawColorBalance();
+}
+
+// === Tone / Color Analysis ===
+function drawToneAnalysis(){
+if(!histoBins)return;
+const{bins,data,total}=histoBins;
+const lumData=bins.lum;
+
+// Shadow / Midtone / Highlight distribution
+let shadow=0,mid=0,highlight=0;
+for(let i=0;i<256;i++){
+if(i<85)shadow+=lumData[i];
+else if(i<170)mid+=lumData[i];
+else highlight+=lumData[i];
+}
+const sP=shadow/total*100,mP=mid/total*100,hP=highlight/total*100;
+
+// Contrast: std deviation of luminance
+let totalPx=0,wSum=0;
+for(let i=0;i<256;i++){totalPx+=lumData[i];wSum+=lumData[i]*i}
+const mean=wSum/totalPx;
+let variance=0;for(let i=0;i<256;i++)variance+=lumData[i]*(i-mean)**2;
+const stdDev=Math.sqrt(variance/totalPx);
+const contrast=Math.min(stdDev/80*100,100);
+let contrastLabel=contrast>65?'高对比':contrast>35?'中等对比':'低对比(平淡)';
+
+// Color temperature: avg(R-B) weighted
+let warmth=0;
+for(let i=0;i<data.length;i+=4)warmth+=(data[i]-data[i+2]);
+warmth/=total;
+const tempLabel=warmth>20?'暖调 (偏黄/橙)':warmth<-20?'冷调 (偏蓝/青)':'中性色调';
+const tempPct=Math.min(Math.abs(warmth)/60*100,100);
+
+// Saturation: average saturation
+let satSum=0;
+for(let i=0;i<data.length;i+=4){
+const r=data[i]/255,g=data[i+1]/255,b=data[i+2]/255;
+const mx=Math.max(r,g,b),mn=Math.min(r,g,b);
+const l=(mx+mn)/2;
+if(mx!==mn)satSum+=l>.5?(mx-mn)/(2-mx-mn):(mx-mn)/(mx+mn);
+}
+const avgSat=satSum/total*100;
+const satLabel=avgSat>50?'高饱和 (鲜艳)':avgSat>25?'中饱和':avgSat>12?'低饱和 (淡雅)':'极低饱和 (黑白感)';
+
+// Dynamic range
+let drLow=255,drHigh=0;
+for(let i=0;i<256;i++){if(lumData[i]>totalPx*0.001){if(i<drLow)drLow=i;drHigh=i}}
+const dynRange=drHigh-drLow;
+const drLabel=dynRange>200?'宽动态范围':dynRange>120?'中等动态范围':'窄动态范围';
+
+// Key (high/low key)
+const keyLabel=mean>160?'高调 (明亮为主)':mean<90?'低调 (阴郁深沉)':'中间调为主';
+
+$('toneContent').innerHTML=`
+<div style="margin-bottom:10px">
+<div style="font-size:10px;color:#777;margin-bottom:4px">影调分布</div>
+<div class="tone-bar">
+<div style="width:${sP}%;background:#444" title="暗部"></div>
+<div style="width:${mP}%;background:#888" title="中间调"></div>
+<div style="width:${hP}%;background:#ccc" title="高光"></div>
+</div>
+<div class="tone-labels"><span>暗部 ${sP.toFixed(0)}%</span><span>中调 ${mP.toFixed(0)}%</span><span>高光 ${hP.toFixed(0)}%</span></div>
+</div>
+
+<div class="tone-meter"><span class="tone-meter-label">影调</span>
+<div class="tone-meter-bar"><div class="tone-meter-fill" style="width:${mean/255*100}%;background:linear-gradient(90deg,#333,#ccc)"></div></div>
+<span class="tone-meter-val">${keyLabel.split(' ')[0]}</span></div>
+
+<div class="tone-meter"><span class="tone-meter-label">对比度</span>
+<div class="tone-meter-bar"><div class="tone-meter-fill" style="width:${contrast}%;background:linear-gradient(90deg,#555,#f0c674)"></div></div>
+<span class="tone-meter-val">${contrast.toFixed(0)}%</span></div>
+
+<div class="tone-meter"><span class="tone-meter-label">色温</span>
+<div class="tone-meter-bar"><div class="tone-meter-fill" style="width:${50+warmth/120*50}%;background:linear-gradient(90deg,#6080f0,#888,#f0a040)"></div></div>
+<span class="tone-meter-val">${warmth>0?'+':''}${warmth.toFixed(0)}</span></div>
+
+<div class="tone-meter"><span class="tone-meter-label">饱和度</span>
+<div class="tone-meter-bar"><div class="tone-meter-fill" style="width:${avgSat}%;background:linear-gradient(90deg,#666,#e060a0)"></div></div>
+<span class="tone-meter-val">${avgSat.toFixed(0)}%</span></div>
+
+<div class="tone-meter"><span class="tone-meter-label">动态范围</span>
+<div class="tone-meter-bar"><div class="tone-meter-fill" style="width:${dynRange/255*100}%;background:linear-gradient(90deg,#333,#81c784)"></div></div>
+<span class="tone-meter-val">${dynRange}</span></div>
+
+<div style="margin-top:8px;padding:8px 10px;background:#0d0d0d;border-radius:8px;font-size:10px;color:#888;line-height:1.6">
+<div style="color:#ccc;margin-bottom:2px">${keyLabel}</div>
+<div>${contrastLabel} · ${tempLabel}</div>
+<div>${satLabel} · ${drLabel}</div>
+</div>
+`;}
+
+// === Hue Wheel ===
+function drawHueWheel(){
+if(!histoBins)return;
+const{data,total}=histoBins;
+const cv=$('hueCv');const dpr=window.devicePixelRatio||1;
+const sz=200;cv.width=sz*dpr;cv.height=sz*dpr;cv.style.width=sz+'px';cv.style.height=sz+'px';
+const ctx=cv.getContext('2d');ctx.scale(dpr,dpr);
+const cx=sz/2,cy=sz/2,outerR=sz/2-4,innerR=outerR*0.35;
+
+// Draw base wheel
+for(let a=0;a<360;a++){
+const r1=a*Math.PI/180,r2=(a+1.5)*Math.PI/180;
+ctx.beginPath();ctx.moveTo(cx+innerR*Math.cos(r1),cy+innerR*Math.sin(r1));
+ctx.arc(cx,cy,outerR,r1,r2);ctx.arc(cx,cy,innerR,r2,r1,true);ctx.closePath();
+ctx.fillStyle=`hsl(${a},60%,30%)`;ctx.fill();
+}
+
+// Count hue distribution
+const hueBins=new Float32Array(360);
+for(let i=0;i<data.length;i+=4){
+const r=data[i]/255,g=data[i+1]/255,b=data[i+2]/255;
+const mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn;
+if(d<0.05)continue; // skip grays
+const l=(mx+mn)/2;if(l<0.05||l>0.95)continue;
+let h;
+if(mx===r)h=((g-b)/d+(g<b?6:0))*60;
+else if(mx===g)h=((b-r)/d+2)*60;
+else h=((r-g)/d+4)*60;
+h=Math.round(h)%360;
+hueBins[h]+=d; // weight by saturation
+}
+const maxBin=Math.max(...hueBins)||1;
+
+// Draw heat overlay
+for(let a=0;a<360;a++){
+const intensity=hueBins[a]/maxBin;
+if(intensity<0.02)continue;
+const r1=a*Math.PI/180,r2=(a+2)*Math.PI/180;
+const ri=innerR+(outerR-innerR)*(1-intensity)*0.3;
+ctx.beginPath();ctx.moveTo(cx+ri*Math.cos(r1),cy+ri*Math.sin(r1));
+ctx.arc(cx,cy,outerR,r1,r2);ctx.arc(cx,cy,ri,r2,r1,true);ctx.closePath();
+ctx.fillStyle=`hsla(${a},80%,60%,${0.2+intensity*0.7})`;ctx.fill();
+}
+
+// Center dark circle
+ctx.beginPath();ctx.arc(cx,cy,innerR-1,0,Math.PI*2);
+ctx.fillStyle='#111';ctx.fill();
+
+// Center text: dominant hue
+let domHue=0,domVal=0;
+for(let i=0;i<360;i++){if(hueBins[i]>domVal){domVal=hueBins[i];domHue=i}}
+ctx.fillStyle='#ccc';ctx.font='500 13px sans-serif';ctx.textAlign='center';
+ctx.fillText('主色相',cx,cy-6);
+ctx.fillStyle='#f0c674';ctx.font='600 16px "SF Mono",monospace';
+ctx.fillText(domHue+'°',cx,cy+14);ctx.textAlign='left';
+}
+
+// === Color Balance ===
+function drawColorBalance(){
+if(!histoBins)return;
+const{data,total}=histoBins;
+let rSum=0,gSum=0,bSum=0;
+for(let i=0;i<data.length;i+=4){rSum+=data[i];gSum+=data[i+1];bSum+=data[i+2]}
+const avgR=rSum/total,avgG=gSum/total,avgB=bSum/total;
+const mx=Math.max(avgR,avgG,avgB)||1;
+const rP=avgR/mx*100,gP=avgG/mx*100,bP=avgB/mx*100;
+
+// Determine bias
+let bias='';
+const diff=Math.max(avgR,avgG,avgB)-Math.min(avgR,avgG,avgB);
+if(diff<10)bias='色彩平衡良好，无明显偏色';
+else if(avgR>avgG&&avgR>avgB)bias=avgR-avgB>30?'明显偏暖(偏红/黄)，可后期降低色温':'轻微偏暖';
+else if(avgB>avgR&&avgB>avgG)bias=avgB-avgR>30?'明显偏冷(偏蓝)，可后期提高色温':'轻微偏冷';
+else if(avgG>avgR&&avgG>avgB)bias='偏绿，可能是白平衡问题';
+else bias='色彩基本平衡';
+
+$('balContent').innerHTML=`
+<div class="bal-row"><span class="bal-label" style="color:#f06060">R</span><div class="bal-bar-wrap"><div class="bal-bar-fill" style="width:${rP}%;background:#f06060"></div></div><span class="bal-val">${Math.round(avgR)}</span></div>
+<div class="bal-row"><span class="bal-label" style="color:#60c060">G</span><div class="bal-bar-wrap"><div class="bal-bar-fill" style="width:${gP}%;background:#60c060"></div></div><span class="bal-val">${Math.round(avgG)}</span></div>
+<div class="bal-row"><span class="bal-label" style="color:#6080f0">B</span><div class="bal-bar-wrap"><div class="bal-bar-fill" style="width:${bP}%;background:#6080f0"></div></div><span class="bal-val">${Math.round(avgB)}</span></div>
+<div class="bal-note">${bias}</div>
+`;
+}
+
+// === Zebra Stripes (highlight/shadow clipping overlay) ===
+let zebraOn=false;
+$('zebraChk').addEventListener('change',e=>{zebraOn=e.target.checked;drC()});
+
+function drawZebra(ctx,w,h){
+if(!zebraOn||!cpI)return;
+const tmp=document.createElement('canvas');tmp.width=w;tmp.height=h;
+const tctx=tmp.getContext('2d');tctx.drawImage(cpI,0,0,w,h);
+const d=tctx.getImageData(0,0,w,h).data;
+
+// Draw zebra on a separate canvas to preserve compositing
+const zCv=document.createElement('canvas');zCv.width=w;zCv.height=h;
+const zCtx=zCv.getContext('2d');
+const out=zCtx.createImageData(w,h);const o=out.data;
+
+for(let i=0;i<d.length;i+=4){
+const l=Math.round(.299*d[i]+.587*d[i+1]+.114*d[i+2]);
+const px=i/4,x=px%w,y=(px/w)|0;
+const stripe=(x+y)%6<3;
+if(l>=250&&stripe){o[i]=255;o[i+1]=60;o[i+2]=60;o[i+3]=180}
+else if(l<=5&&stripe){o[i]=60;o[i+1]=100;o[i+2]=255;o[i+3]=180}
+}
+zCtx.putImageData(out,0,0);
+ctx.drawImage(zCv,0,0);
+}
+
+// === Flip / B&W toggles ===
+$('flipChk').addEventListener('change',e=>{$('cC').classList.toggle('flip-h',e.target.checked)});
+$('bwChk').addEventListener('change',e=>{$('cC').classList.toggle('bw',e.target.checked)});
+
+// === Magnifier ===
+let magOn=false;
+$('magChk').addEventListener('change',e=>{magOn=e.target.checked;$('magLens').style.display=magOn?'none':'none'});
+(function initMagnifier(){
+const cc=$('cC'),lens=$('magLens'),magCv=$('magCv');
+const ZOOM=3,SIZE=160;magCv.width=SIZE;magCv.height=SIZE;
+cc.addEventListener('mousemove',e=>{
+if(!magOn||!cpI)return;
+lens.style.display='block';
+const rect=cc.getBoundingClientRect();
+const mx=e.clientX-rect.left,my=e.clientY-rect.top;
+const imgEl=$('cImg');
+const iw=imgEl.clientWidth,ih=imgEl.clientHeight;
+// Position lens
+lens.style.left=(mx-SIZE/2)+'px';lens.style.top=(my-SIZE/2)+'px';
+// Draw zoomed region
+const ctx=magCv.getContext('2d');
+const sx=(mx/iw)*cpI.naturalWidth-SIZE/(2*ZOOM);
+const sy=(my/ih)*cpI.naturalHeight-SIZE/(2*ZOOM);
+const sw=SIZE/ZOOM,sh=SIZE/ZOOM;
+ctx.clearRect(0,0,SIZE,SIZE);
+ctx.drawImage(cpI,sx*(cpI.naturalWidth/(cpI.naturalWidth)),sy,cpI.naturalWidth/iw*sw/ZOOM*ZOOM,cpI.naturalHeight/ih*sh/ZOOM*ZOOM,0,0,SIZE,SIZE);
+// Simpler: just map mouse pos to source image coords
+const srcX=(mx/iw)*cpI.naturalWidth;
+const srcY=(my/ih)*cpI.naturalHeight;
+const srcW=cpI.naturalWidth/(ZOOM*2);const srcH=cpI.naturalHeight/(ZOOM*2);
+ctx.clearRect(0,0,SIZE,SIZE);
+ctx.drawImage(cpI,srcX-srcW/2,srcY-srcH/2,srcW,srcH,0,0,SIZE,SIZE);
+// Crosshair
+ctx.strokeStyle='rgba(240,198,116,.5)';ctx.lineWidth=1;
+ctx.beginPath();ctx.moveTo(SIZE/2,0);ctx.lineTo(SIZE/2,SIZE);ctx.stroke();
+ctx.beginPath();ctx.moveTo(0,SIZE/2);ctx.lineTo(SIZE,SIZE/2);ctx.stroke();
+});
+cc.addEventListener('mouseleave',()=>{lens.style.display='none'});
+})();
+
+// === Focus Detection (Laplacian edge detection) ===
+let focusImg=null;
+function drawFocusMap(srcImg){
+if(!srcImg)return;
+const cv=$('focusCv');const dpr=window.devicePixelRatio||1;
+const sz=500;const aspect=srcImg.naturalHeight/srcImg.naturalWidth;
+const cw=sz,ch=Math.round(sz*aspect);
+cv.width=cw*dpr;cv.height=ch*dpr;cv.style.width='100%';cv.style.height='auto';
+const ctx=cv.getContext('2d');ctx.scale(dpr,dpr);
+
+const tmp=document.createElement('canvas');tmp.width=cw;tmp.height=ch;
+const tctx=tmp.getContext('2d');tctx.drawImage(srcImg,0,0,cw,ch);
+const d=tctx.getImageData(0,0,cw,ch).data;
+const gray=new Float32Array(cw*ch);
+for(let i=0;i<d.length;i+=4)gray[i/4]=.299*d[i]+.587*d[i+1]+.114*d[i+2];
+
+const lap=new Float32Array(cw*ch);
+let maxLap=0;
+for(let y=1;y<ch-1;y++){for(let x=1;x<cw-1;x++){
+const i=y*cw+x;
+const v=Math.abs(gray[i-cw]+gray[i+cw]+gray[i-1]+gray[i+1]-4*gray[i]);
+lap[i]=v;if(v>maxLap)maxLap=v;
+}}
+
+ctx.drawImage(srcImg,0,0,cw,ch);
+ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,cw,ch);
+
+const out=ctx.createImageData(cw,ch);const o=out.data;
+const threshold=maxLap*0.15;
+let sharpPx=0;
+for(let i=0;i<lap.length;i++){
+const v=lap[i];
+if(v>threshold){
+sharpPx++;
+const intensity=Math.min(v/maxLap,1);
+o[i*4]=Math.round(240*intensity);
+o[i*4+1]=Math.round(220*intensity);
+o[i*4+2]=Math.round(50*intensity);
+o[i*4+3]=Math.round(200*intensity);
+}
+}
+const tmpOv=document.createElement('canvas');tmpOv.width=cw;tmpOv.height=ch;
+tmpOv.getContext('2d').putImageData(out,0,0);
+ctx.drawImage(tmpOv,0,0);
+
+const score=Math.min(Math.round(sharpPx/(cw*ch)*500),100);
+const label=score>60?'锐利 (对焦准确)':score>30?'中等 (可能轻微脱焦)':'偏软 (可能脱焦或抖动)';
+const color=score>60?'#81c784':score>30?'#f0c674':'#e57373';
+$('focusScore').innerHTML=`<div class="focus-score"><span class="fs-val" style="color:${color}">${score}</span><span class="fs-label">${label}<br>亮色区域=锐利焦点</span></div>`;
+}
+
+document.querySelectorAll('#histoTabs .histo-tab').forEach(b=>{
+b.addEventListener('click',()=>{document.querySelectorAll('#histoTabs .histo-tab').forEach(x=>x.classList.remove('active'));
+b.classList.add('active');histoCh=b.dataset.ch;drawHistogram()});
+});
+
+// === EXIF Parser (JPEG APP1 segment) ===
+function parseExif(buffer){
+const view=new DataView(buffer);
+if(view.getUint16(0)!==0xFFD8)return null; // not JPEG
+let offset=2;
+while(offset<view.byteLength-2){
+const marker=view.getUint16(offset);
+if(marker===0xFFE1){// APP1 = EXIF
+const len=view.getUint16(offset+2);
+const exifStart=offset+4;
+// Check "Exif\0\0"
+if(view.getUint32(exifStart)===0x45786966&&view.getUint16(exifStart+4)===0x0000){
+return readExifIFD(view,exifStart+6);
+}
+return null;
+}
+if((marker&0xFF00)!==0xFF00)break;
+offset+=2+view.getUint16(offset+2);
+}
+return null;
+}
+
+function readExifIFD(view,tiffStart){
+const le=view.getUint16(tiffStart)===0x4949; // little endian
+const g16=(o)=>le?view.getUint16(tiffStart+o,true):view.getUint16(tiffStart+o,false);
+const g32=(o)=>le?view.getUint32(tiffStart+o,true):view.getUint32(tiffStart+o,false);
+
+const ifdOff=g32(4);
+const count=g16(ifdOff);
+const result={};
+const TAGS={0x010F:'make',0x0110:'model',0x0112:'orientation',
+0x829A:'exposureTime',0x829D:'fNumber',0x8827:'iso',0x9003:'dateTime',
+0x920A:'focalLength',0x9209:'flash',0xA405:'focalLength35mm',
+0xA434:'lens'};
+const EXIF_IFD_TAG=0x8769;
+let exifIFDOffset=null;
+
+function readIFD(off){
+const cnt=g16(off);
+for(let i=0;i<cnt;i++){
+const entryOff=off+2+i*12;
+if(entryOff+12>view.byteLength-tiffStart)break;
+const tag=g16(entryOff);
+const type=g16(entryOff+2);
+const num=g32(entryOff+4);
+const valOff=entryOff+8;
+
+if(tag===EXIF_IFD_TAG){exifIFDOffset=g32(valOff);continue}
+
+const name=TAGS[tag];if(!name)continue;
+
+if(type===2){// ASCII string
+const strOff=num>4?g32(valOff):valOff;
+let s='';for(let j=0;j<num-1&&tiffStart+strOff+j<view.byteLength;j++)s+=String.fromCharCode(view.getUint8(tiffStart+strOff+j));
+result[name]=s.trim();
+}else if(type===3){// SHORT
+result[name]=g16(valOff);
+}else if(type===4){// LONG
+result[name]=g32(valOff);
+}else if(type===5){// RATIONAL (unsigned)
+const rOff=g32(valOff);
+if(tiffStart+rOff+8<=view.byteLength){
+const numer=g32(rOff);const denom=g32(rOff+4);
+result[name]=denom?numer/denom:0;
+result[name+'_raw']=[numer,denom];
+}
+}else if(type===10){// SRATIONAL
+const rOff=g32(valOff);
+if(tiffStart+rOff+8<=view.byteLength){
+const numer=le?view.getInt32(tiffStart+rOff,true):view.getInt32(tiffStart+rOff,false);
+const denom=le?view.getInt32(tiffStart+rOff+4,true):view.getInt32(tiffStart+rOff+4,false);
+result[name]=denom?numer/denom:0;
+}
+}
+}
+}
+
+try{
+readIFD(ifdOff);
+if(exifIFDOffset!==null)readIFD(exifIFDOffset);
+}catch(e){}
+return Object.keys(result).length?result:null;
+}
+
+// === Image Info ===
+let compFileSize=0;
+function showImageInfo(){
+if(!cpI)return;
+const w=cpI.naturalWidth,h=cpI.naturalHeight;
+const gcd=(a,b)=>b?gcd(b,a%b):a;const g=gcd(w,h);
+const ratio=`${w/g}:${h/g}`;
+const mp=(w*h/1e6).toFixed(1);
+const orient=w>h?'横幅':'竖幅';
+
+// Basic info
+const items=[
+{k:'尺寸',v:`${w} × ${h}`},{k:'比例',v:ratio},{k:'像素',v:mp+'MP'},
+{k:'方向',v:orient},{k:'宽高比',v:(w/h).toFixed(2)}
+];
+if(compFileSize>0)items.push({k:'文件',v:compFileSize>1e6?(compFileSize/1e6).toFixed(1)+'MB':(compFileSize/1e3).toFixed(0)+'KB'});
+
+// EXIF parameters
+const ex=compExif;
+if(ex){
+if(ex.make||ex.model)items.push({k:'相机',v:((ex.make||'')+' '+(ex.model||'')).trim()});
+if(ex.lens)items.push({k:'镜头',v:ex.lens});
+if(ex.focalLength)items.push({k:'焦距',v:Math.round(ex.focalLength)+'mm'+(ex.focalLength35mm?' (等效'+ex.focalLength35mm+'mm)':'')});
+if(ex.fNumber)items.push({k:'光圈',v:'f/'+ex.fNumber.toFixed(1)});
+if(ex.exposureTime){
+const et=ex.exposureTime;
+items.push({k:'快门',v:et>=1?et+'s':'1/'+Math.round(1/et)+'s'});
+}
+if(ex.iso)items.push({k:'ISO',v:''+ex.iso});
+if(ex.flash!==undefined)items.push({k:'闪光灯',v:ex.flash&1?'已闪光':'未闪光'});
+if(ex.dateTime)items.push({k:'拍摄时间',v:ex.dateTime});
+}
+
+let html=items.map(i=>`<div class="info-item"><span class="ik">${i.k}</span><span class="iv">${i.v}</span></div>`).join('');
+
+if(!ex){
+html+=`<div class="info-item" style="grid-column:1/-1;margin-top:6px">
+<span style="font-size:10px;color:#555">📷 未检测到EXIF拍摄参数（截图/社交媒体图片/PNG格式通常不含EXIF）</span>
+</div>`;
+}
+
+$('imgInfoGrid').innerHTML=html;
+}
+
+// === Crop Ratio ===
+let cropRatio=null;
+document.querySelectorAll('#cropTags .tag').forEach(b=>{
+b.addEventListener('click',()=>{
+document.querySelectorAll('#cropTags .tag').forEach(x=>x.classList.remove('active'));
+b.classList.add('active');
+const v=b.dataset.cr;
+if(v==='0')cropRatio=null;
+else{const[a,bb]=v.split(':').map(Number);cropRatio=[a,bb]}
+drC();
+});
+});
+
+$('cDL').addEventListener('click',()=>{if(!cpI)return toast('请先上传');const cv=document.createElement('canvas');cv.width=cpI.naturalWidth;cv.height=cpI.naturalHeight;const ctx=cv.getContext('2d');ctx.drawImage(cpI,0,0);ctx.drawImage($('cCv'),0,0,$('cCv').width,$('cCv').height,0,0,cv.width,cv.height);const a=document.createElement('a');a.download='comp-'+Date.now()+'.png';a.href=cv.toDataURL('image/png');a.click();toast('已下载')});
+$('cClr').addEventListener('click',()=>{cpI=null;compFileSize=0;cropRatio=null;compExif=null;cFI.value='';$('cImg').src='';$('cPV').style.display='none';cDZ.style.display='block';
+$('imgInfoGrid').innerHTML='';$('balContent').innerHTML='';$('toneContent').innerHTML='';
+const hcv=$('histoCv');hcv.getContext('2d').clearRect(0,0,hcv.width,hcv.height);
+$('cC').classList.remove('flip-h','bw');$('flipChk').checked=false;$('bwChk').checked=false;$('magChk').checked=false;$('zebraChk').checked=false;
+zebraOn=false;magOn=false;
+document.querySelectorAll('#cropTags .tag').forEach((b,i)=>{b.classList.toggle('active',i===0)})});
+
+// === Exposure ===
+function calcExp(){const ap=+$('eA').value,sh=+$('eS').value,iso=+$('eI').value;
+const EV=Math.log2(ap*ap/sh)-Math.log2(iso/100);$('eEV').textContent='EV '+EV.toFixed(1);
+const fs=v=>v>=1?v+'s':'1/'+Math.round(1/v);$('edAv').textContent='f/'+ap;$('edSv').textContent=fs(sh);$('edIv').textContent='ISO '+iso}
+['eA','eS','eI'].forEach(id=>$(id).addEventListener('change',calcExp));calcExp();
+
+// === Watermark ===
+const wmImgs=[];
+const wDZ=$('wDZ'),wFI=$('wFI');
+wDZ.addEventListener('click',()=>wFI.click());
+wDZ.addEventListener('dragover',e=>{e.preventDefault();wDZ.classList.add('over')});
+wDZ.addEventListener('dragleave',()=>wDZ.classList.remove('over'));
+wDZ.addEventListener('drop',e=>{e.preventDefault();wDZ.classList.remove('over');hWF(e.dataTransfer.files)});
+wFI.addEventListener('change',e=>hWF(e.target.files));
+['wT','wFs','wCl','wOp','wPos','wRot'].forEach(id=>$(id).addEventListener('input',()=>rnWM()));
+
+function hWF(files){[...files].forEach(f=>{if(!f.type.startsWith('image/'))return;const r=new FileReader();r.onload=e=>{const i=new Image();i.onload=()=>{wmImgs.push(i);rnWM()};i.src=e.target.result};r.readAsDataURL(f)})}
+
+function rnWM(){const pa=$('wPA');pa.innerHTML='';
+wmImgs.forEach((img,idx)=>{const div=document.createElement('div');div.className='wmt';const cv=document.createElement('canvas');
+const maxW=600,sc=Math.min(maxW/img.naturalWidth,maxW/img.naturalHeight,1);
+cv.width=Math.round(img.naturalWidth*sc);cv.height=Math.round(img.naturalHeight*sc);
+const ctx=cv.getContext('2d');ctx.drawImage(img,0,0,cv.width,cv.height);
+const txt=$('wT').value,op=+$('wOp').value/100,pos=$('wPos').value,rot=+$('wRot').value;
+const fsc=cv.width/1000;const fs=Math.max(+$('wFs').value*fsc,8);
+ctx.globalAlpha=op;ctx.fillStyle=$('wCl').value;ctx.font=fs+'px sans-serif';
+if(pos==='tile'){ctx.save();ctx.translate(cv.width/2,cv.height/2);ctx.rotate(rot*Math.PI/180);const tw=ctx.measureText(txt).width+fs*2;const lh=fs*3;for(let y=-cv.height;y<cv.height*2;y+=lh)for(let x=-cv.width;x<cv.width*2;x+=tw)ctx.fillText(txt,x,y);ctx.restore()}
+else if(pos==='ct'){ctx.save();ctx.translate(cv.width/2,cv.height/2);ctx.rotate(rot*Math.PI/180);ctx.textAlign='center';ctx.font=(fs*1.5)+'px sans-serif';ctx.fillText(txt,0,0);ctx.restore()}
+else{const m=ctx.measureText(txt);const pad=fs*0.8;let x,y;if(pos==='br'){x=cv.width-m.width-pad;y=cv.height-pad}else if(pos==='bl'){x=pad;y=cv.height-pad}else{x=(cv.width-m.width)/2;y=cv.height-pad}ctx.fillText(txt,x,y)}
+ctx.globalAlpha=1;div.appendChild(cv);pa.appendChild(div)});
+if(wmImgs.length)wDZ.style.display='none'}
+
+$('wDL').addEventListener('click',()=>{if(!wmImgs.length)return toast('请先上传');
+wmImgs.forEach((img,i)=>{const cv=document.createElement('canvas');cv.width=img.naturalWidth;cv.height=img.naturalHeight;
+const ctx=cv.getContext('2d');ctx.drawImage(img,0,0,cv.width,cv.height);
+const txt=$('wT').value,op=+$('wOp').value/100,pos=$('wPos').value,rot=+$('wRot').value;
+// Scale font size relative to image size (base: 24px for 1000px width)
+const scale=cv.width/1000;const fs=Math.max(+$('wFs').value*scale,12);
+ctx.globalAlpha=op;ctx.fillStyle=$('wCl').value;ctx.font=fs+'px sans-serif';
+if(pos==='tile'){ctx.save();ctx.translate(cv.width/2,cv.height/2);ctx.rotate(rot*Math.PI/180);const tw=ctx.measureText(txt).width+fs*2;const lh=fs*3;for(let y=-cv.height;y<cv.height*2;y+=lh)for(let x=-cv.width;x<cv.width*2;x+=tw)ctx.fillText(txt,x,y);ctx.restore()}
+else if(pos==='ct'){ctx.save();ctx.translate(cv.width/2,cv.height/2);ctx.rotate(rot*Math.PI/180);ctx.textAlign='center';ctx.font=(fs*1.5)+'px sans-serif';ctx.fillText(txt,0,0);ctx.restore()}
+else{const m=ctx.measureText(txt);const pad=fs*0.8;let x,y;if(pos==='br'){x=cv.width-m.width-pad;y=cv.height-pad}else if(pos==='bl'){x=pad;y=cv.height-pad}else{x=(cv.width-m.width)/2;y=cv.height-pad}ctx.fillText(txt,x,y)}
+ctx.globalAlpha=1;const a=document.createElement('a');a.download='watermarked-'+(i+1)+'.png';a.href=cv.toDataURL('image/png');a.click()});toast('已下载'+wmImgs.length+'张')});
+$('wClr').addEventListener('click',()=>{wmImgs.length=0;wFI.value='';$('wPA').innerHTML='';wDZ.style.display='block'});
+
+// === Focus Detection Tab ===
+const focusDZ=$('focusDZ'),focusFI=$('focusFI');
+focusDZ.addEventListener('click',()=>focusFI.click());
+focusDZ.addEventListener('dragover',e=>{e.preventDefault();focusDZ.classList.add('over')});
+focusDZ.addEventListener('dragleave',()=>focusDZ.classList.remove('over'));
+focusDZ.addEventListener('drop',e=>{e.preventDefault();focusDZ.classList.remove('over');e.dataTransfer.files[0]&&hFocusFile(e.dataTransfer.files[0])});
+focusFI.addEventListener('change',e=>e.target.files[0]&&hFocusFile(e.target.files[0]));
+
+function hFocusFile(f){
+if(!f.type.startsWith('image/'))return;
+const r=new FileReader();r.onload=e=>{
+const img=new Image();img.onload=()=>{
+focusImg=img;
+$('focusOrigImg').src=e.target.result;
+focusDZ.style.display='none';$('focusPV').style.display='block';
+setTimeout(()=>drawFocusMap(img),50);
+};img.src=e.target.result;
+};r.readAsDataURL(f);
+}
+$('focusClr').addEventListener('click',()=>{focusImg=null;focusFI.value='';$('focusOrigImg').src='';$('focusPV').style.display='none';focusDZ.style.display='block';$('focusScore').innerHTML='';const fcv=$('focusCv');fcv.getContext('2d').clearRect(0,0,fcv.width,fcv.height)});
+
+// =========================================================
+// TAB 8: CHECKLIST GENERATOR
+// =========================================================
+const CL_DATA={
+portrait:{
+  label:'人像写真',icon:'👤',
+  gear:['机身×1','人像镜头(85mm/50mm f/1.4-1.8)','反光板/柔光板','备用电池×2','高速SD卡×2','镜头清洁布'],
+  gearStudio:['背景纸/布','闪光灯+柔光箱','灯架×2','引闪器'],
+  gearOutdoor:['遮光罩','防潮袋(雨天备用)','便携凳/垫子'],
+  shots:['全身站姿(正面/侧面/45°)','半身特写','面部特写/眼神光','背影/回眸','低角度仰拍','环境人像(广角交代场景)','动态抓拍(走路/转圈/抛物)','道具互动(花/帽子/饮品)','逆光剪影/发丝光'],
+  timeline:['提前30min到场踩点试光','沟通妆造和服装','先拍全身大景找感觉','再拍半身和特写','中途换装/换场地','最后拍动态和创意镜头','预留10min回看精选'],
+  notes:['提前确认妆造是否自带','带参考图和客户对齐预期','注意防晒和补妆','多和模特沟通引导情绪']
+},
+wedding:{
+  label:'婚纱婚礼',icon:'💍',
+  gear:['机身×2(双机备份)','24-70mm f/2.8','70-200mm f/2.8','35mm或50mm定焦','机顶闪光灯×2','备用电池×4','高速SD卡×4','灵眸稳定器(可选)'],
+  gearStudio:['离机闪+柔光箱','背景架'],
+  gearOutdoor:['反光板','防雨套','大力夹(固定头纱)'],
+  shots:['婚纱细节(戒指/鞋/请柬/花束)','新娘化妆过程','新郎准备','First Look','外景合影(多角度多构图)','牵手/拥抱/亲吻','婚礼仪式全程','交换戒指特写','亲友合影','敬酒/游戏环节','散场/送客'],
+  timeline:['提前1天踩点确认光线和路线','化妆间拍细节和过程','仪式前1h拍外景','仪式中双机位(主+侧)','宴会跟拍','散场前拍夜景人像'],
+  notes:['提前要流程表和关键人名单','带白色和黑色两张记忆卡区分','注意仪式中不要挡宾客视线','随时擦镜头(婚宴油烟大)','和摄像师提前对机位','电池和卡每2小时检查一次']
+},
+family:{
+  label:'亲子全家福',icon:'👨‍👩‍👧',
+  gear:['机身×1','35mm或50mm定焦','24-70mm变焦','反光板','备用电池×2','SD卡×2','小玩具/泡泡机(逗孩子)'],
+  gearStudio:['柔光灯×2','背景布','小凳子'],
+  gearOutdoor:['野餐垫','遮阳伞'],
+  shots:['全家福正式合影','父母+孩子温馨互动','孩子独照(笑/跑/玩)','父子/母子单独合影','牵手/拥抱/举高高','孩子特写(表情/小手/小脚)','自然抓拍(嬉闹/对话)','全家走路/奔跑的背影'],
+  timeline:['选择孩子精力最好的时段','先拍正式合影(孩子耐心最足)','再拍互动和抓拍','穿插休息和零食','最后拍轻松自然的'],
+  notes:['提前告知穿着统一色系','带小零食/玩具用于引导','避开孩子午睡时间','多和家长沟通，引导自然互动','耐心！孩子不配合很正常']
+},
+product:{
+  label:'产品静物',icon:'📦',
+  gear:['机身×1','微距镜头/90mm-100mm','三脚架(必须)','快门线/遥控器','反光板/白卡','黑卡(压光)','灰卡(白平衡)'],
+  gearStudio:['闪光灯×2-3','柔光箱/柔光伞','背景纸(白/黑/灰/彩色)','亚克力反光板','静物台'],
+  gearOutdoor:['便携柔光板','背景布'],
+  shots:['产品正面/45°/侧面标准照','产品细节特写(材质/logo/标签)','使用场景模拟','多角度展示(俯拍/平拍/仰拍)','产品组合/系列排列','创意摆拍(搭配道具)','纯白底抠图用图'],
+  timeline:['布光测试(30min)','先拍标准图','再拍场景和创意','最后拍细节和备选角度','全程三脚架固定机位'],
+  notes:['产品提前擦拭干净','戴手套避免指纹','注意反光处理(偏振镜/黑卡)','RAW格式拍摄便于后期','确认客户需要的尺寸和底色']
+},
+food:{
+  label:'美食',icon:'🍽️',
+  gear:['机身×1','50mm或90mm定焦','三脚架','反光板/白卡','灰卡','喷水壶(增加水珠质感)'],
+  gearStudio:['闪光灯+柔光箱','背景纸/木板/大理石板','餐具/桌布道具'],
+  gearOutdoor:['便携反光板'],
+  shots:['45°经典角度','正俯拍(Flat Lay)','侧面平拍(饮品/汉堡)','细节特写(纹理/酱汁/拉丝)','全景摆盘(多菜组合)','制作过程(倒酒/切割/撒料)','人物入镜(手/筷子/勺子)'],
+  timeline:['提前布景和摆盘','食物上桌后15min内必须拍完(会变色)','先拍全景→中景→特写','热菜优先(冷了没蒸汽)','饮品最后拍(冰会化)'],
+  notes:['食物造型比拍摄更重要','喷水/刷油增加光泽','用自然光优先(窗光)','注意白平衡(食物偏色很明显)','备用食材以防翻车']
+},
+landscape:{
+  label:'风光',icon:'🏔️',
+  gear:['机身×1','广角变焦(16-35mm)','长焦(70-200mm)','三脚架(必须)','快门线','CPL偏振镜','ND减光镜(长曝)','GND渐变镜','镜头布/气吹'],
+  gearOutdoor:['头灯(日出前摸黑)','防寒手套','雨衣/防水包','充电宝','水和干粮'],
+  shots:['日出/日落全景','黄金时段逆光','蓝调时刻','前景+中景+远景构图','流水丝滑长曝','星轨/银河(夜景)','云海/雾气','小品特写(花/石/树)','接片全景(Panorama)'],
+  timeline:['提前查天气和日出日落时间','日出前1h到达机位','蓝调→日出→黄金时段连拍','白天踩点和休息','傍晚黄金→日落→蓝调'],
+  notes:['三脚架一定带！','关注潮汐表(海景)','带足电池(低温掉电快)','拍RAW+JPG双存储','注意安全，不要冒险取景']
+},
+street:{
+  label:'街拍纪实',icon:'🌃',
+  gear:['机身×1(小巧优先)','35mm或28mm定焦','备用电池×2','SD卡×2','腰包/斜挎包(快速取机)'],
+  gearOutdoor:['帽子/墨镜(低调)','舒适的鞋'],
+  shots:['街头人物(表情/动作)','光影几何(投影/线条)','色彩碰撞(撞色墙面/路人)','反射(水洼/镜面)','框架构图(门窗/拱门)','层次(前中后景)','决定性瞬间(抓拍)','城市肌理(建筑/招牌/涂鸦)'],
+  timeline:['选择人流高峰时段','沿固定路线来回走','发现好光线就蹲守','不要急，观察比按快门重要'],
+  notes:['尊重被摄者，必要时征得同意','设置相机快速抓拍(高速连拍+自动ISO)','用安静快门(电子快门)','保持低调不引起注意','拍完当天就挑片']
+},
+event:{
+  label:'活动会议',icon:'🎤',
+  gear:['机身×2','24-70mm f/2.8','70-200mm f/2.8','机顶闪光灯×2','备用电池×4','高速SD卡×4','独脚架(可选)'],
+  gearStudio:[],
+  gearOutdoor:[],
+  shots:['场地全景/签到区','主持人/演讲者','嘉宾/观众反应','互动环节','PPT+演讲者同框','颁奖/握手/合影','茶歇交流','活动物料(背板/手册/礼品)'],
+  timeline:['提前1h到场拍空场','签到环节拍嘉宾入场','主要环节全程跟拍','中途拍花絮和细节','结束后拍合影'],
+  notes:['提前要议程表和重要嘉宾名单','了解灯光条件(是否可以补光)','带长焦避免走上台前','注意快门声音(用安静模式)','存储卡分段备份(每2小时换卡)']
+}
+};
+
+let clType='portrait';
+document.querySelectorAll('#clTypes .cl-type').forEach(b=>{
+b.addEventListener('click',()=>{
+document.querySelectorAll('#clTypes .cl-type').forEach(x=>x.classList.remove('active'));
+b.classList.add('active');clType=b.dataset.type;
+});
+});
+
+$('clGenBtn').addEventListener('click',generateChecklist);
+$('clResetBtn').addEventListener('click',()=>{$('clOutput').style.display='none'});
+
+function generateChecklist(){
+const type=CL_DATA[clType];if(!type)return;
+const venue=$('clVenue').value;
+const duration=$('clDuration').value;
+const people=$('clPeople').value;
+const season=$('clSeason').value;
+const seasonLabel={spring:'春季',summer:'夏季',autumn:'秋季',winter:'冬季'}[season];
+const venueLabel={outdoor:'户外',indoor:'室内',studio:'影棚',both:'室内+户外'}[venue];
+
+// Header
+$('clHeader').innerHTML=`<h2>${type.icon} ${type.label}拍摄清单</h2>
+<div class="cl-meta">
+<span>📍 ${venueLabel}</span><span>⏱ ${duration}小时</span>
+<span>👥 ${people}人</span><span>🍂 ${seasonLabel}</span>
+<span style="color:#555">${new Date().toLocaleDateString('zh-CN')}</span>
+</div>`;
+
+// Gear section
+let gear=[...type.gear];
+if(venue==='studio'||venue==='both')gear.push(...(type.gearStudio||[]));
+if(venue==='outdoor'||venue==='both')gear.push(...(type.gearOutdoor||[]));
+if(+duration>=4)gear.push('充电宝','水和零食');
+if(people==='5+'||people==='3-5')gear.push('广角镜头(合影用)');
+if(season==='summer')gear.push('防晒喷雾','扇子/便携风扇','矿泉水×多瓶');
+if(season==='winter')gear.push('暖宝宝','电池保温袋(低温掉电)','保温杯');
+if(season==='autumn')gear.push('落叶(可收集用作道具)');
+if(season==='spring')gear.push('防过敏口罩(花粉季)');
+
+// Shots adjusted by people count
+let shots=[...type.shots];
+if(people==='2')shots.push('双人合影/互动');
+if(people==='3-5'||people==='5+')shots.push('集体合影(多种队形)','分组小合影');
+
+// Timeline adjusted by duration
+let timeline=[...type.timeline];
+if(+duration>=4)timeline.push('中途安排休息和用餐');
+if(+duration>=8)timeline.push('分上午/下午两个场次','中间留1h午休');
+
+// Notes adjusted
+let notes=[...type.notes];
+if(venue==='outdoor'&&(season==='summer'))notes.push('避开正午11-14点(光线太硬+中暑风险)');
+if(venue==='outdoor'&&(season==='winter'))notes.push('注意模特保暖，穿脱外套快拍');
+if(venue==='outdoor')notes.push('提前查天气，备好雨天方案');
+
+// Render sections
+const sections=[
+{icon:'📷',title:'器材清单',items:gear},
+{icon:'📸',title:'拍摄列表 (Shot List)',items:shots},
+{icon:'🕐',title:'时间规划',items:timeline}
+];
+
+$('clSections').innerHTML=sections.map(sec=>`
+<div class="cl-section"><h3><span class="sec-icon">${sec.icon}</span>${sec.title} <span style="font-size:10px;color:#555;font-weight:400">${sec.items.length}项</span></h3>
+${sec.items.map((item,i)=>`<div class="cl-item" id="cli_${sec.title}_${i}">
+<input type="checkbox" id="cb_${sec.title}_${i}" onchange="this.parentElement.classList.toggle('checked',this.checked)">
+<label for="cb_${sec.title}_${i}">${item}</label></div>`).join('')}
+</div>`).join('');
+
+$('clNotes').innerHTML=`<h3>⚠️ 注意事项</h3><ul>${notes.map(n=>`<li>${n}</li>`).join('')}</ul>`;
+
+$('clOutput').style.display='block';
+$('clOutput').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// Export checklist as image
+$('clExportBtn').addEventListener('click',()=>{
+const W=1200,P=40;
+const type=CL_DATA[clType];if(!type)return;
+const venue=$('clVenue').value,duration=$('clDuration').value,people=$('clPeople').value,season=$('clSeason').value;
+const venueL={outdoor:'户外',indoor:'室内',studio:'影棚',both:'室内+户外'}[venue];
+const seasonL={spring:'春',summer:'夏',autumn:'秋',winter:'冬'}[season];
+
+// Collect all checked/unchecked states
+const sections=$('clSections').querySelectorAll('.cl-section');
+const data=[];
+sections.forEach(sec=>{
+const title=sec.querySelector('h3').textContent;
+const items=[];
+sec.querySelectorAll('.cl-item').forEach(item=>{
+const cb=item.querySelector('input[type=checkbox]');
+const label=item.querySelector('label').textContent.trim();
+items.push({text:label,checked:cb.checked});
+});
+data.push({title,items});
+});
+
+const notes=[];
+$('clNotes').querySelectorAll('li').forEach(li=>notes.push(li.textContent));
+
+// Calculate height
+let H=160;// header
+data.forEach(s=>{H+=40+s.items.length*28+20});
+H+=40+notes.length*24+60;
+H=Math.max(H,600);
+
+const cv=$('exCv');cv.width=W;cv.height=H;const ctx=cv.getContext('2d');
+ctx.fillStyle='#0a0a0a';ctx.fillRect(0,0,W,H);
+
+// Header
+ctx.fillStyle='#f0c674';ctx.font='600 24px sans-serif';
+ctx.fillText(type.icon+' '+type.label+'拍摄清单',P,50);
+ctx.fillStyle='#666';ctx.font='12px sans-serif';
+ctx.fillText(`${venueL} · ${duration}h · ${people}人 · ${seasonL} · ${new Date().toLocaleDateString('zh-CN')}`,P,74);
+
+// Sections in columns
+let y=110;const colW=(W-P*2-20)/data.length;
+data.forEach((sec,si)=>{
+const x=P+si*(colW+10);let sy=y;
+ctx.fillStyle='#f0c674';ctx.font='500 13px sans-serif';ctx.fillText(sec.title,x,sy);sy+=24;
+sec.items.forEach(item=>{
+ctx.fillStyle=item.checked?'#333':'#1a1a1a';
+ctx.beginPath();ctx.roundRect(x,sy-12,colW-10,24,6);ctx.fill();
+if(item.checked){ctx.fillStyle='#f0c674';ctx.font='12px sans-serif';ctx.fillText('✓',x+6,sy+1)}
+ctx.fillStyle=item.checked?'#555':'#ccc';ctx.font=(item.checked?'line-through ':'')+' 11px sans-serif';
+ctx.fillText(item.text,x+22,sy+1);sy+=28;
+});
+});
+
+// Notes
+y=110+Math.max(...data.map(s=>s.items.length))*28+50;
+ctx.fillStyle='#e57373';ctx.font='500 13px sans-serif';ctx.fillText('⚠️ 注意事项',P,y);y+=20;
+ctx.fillStyle='#888';ctx.font='11px sans-serif';
+notes.forEach(n=>{ctx.fillText('⚠ '+n,P+4,y);y+=22});
+
+// Watermark
+ctx.fillStyle='#1a1a1a';ctx.font='10px sans-serif';ctx.textAlign='right';
+ctx.fillText('Photo Toolbox · Shoot Checklist',W-P,H-16);ctx.textAlign='left';
+
+const a=document.createElement('a');a.download='shoot-checklist-'+clType+'.png';a.href=cv.toDataURL('image/png');a.click();toast('清单已导出');
+});
+</script>
+</body>
+</html>
