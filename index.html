@@ -186,7 +186,47 @@ canvas.hid{display:none}
 
 .cl-actions{display:flex;gap:8px;margin-top:16px}
 
+/* Film Simulator */
+.fm-grid{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.fm-chip{padding:6px 14px;border-radius:18px;border:1px solid #2a2a2a;background:#151515;font-size:11px;cursor:pointer;color:#888;transition:.2s;font-family:inherit}
+.fm-chip:hover{border-color:#555;color:#ccc}.fm-chip.active{background:#f0c674;border-color:#f0c674;color:#000;font-weight:500}
+.fm-chip .fm-brand{font-size:9px;opacity:.6;margin-right:2px}
+.fm-panels{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+.fm-panel{background:#111;border:1px solid #1a1a1a;border-radius:14px;overflow:hidden}
+.fm-panel-head{padding:12px 16px;border-bottom:1px solid #1a1a1a;font-size:13px;font-weight:500;color:#ccc}
+.fm-panel-body{padding:16px}
+.fm-img-wrap{border-radius:8px;overflow:hidden;background:#000;margin-bottom:12px}
+.fm-img-wrap img{width:100%;display:block}
+.fm-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:8px}
+.fm-stat{background:#0d0d0d;border-radius:8px;padding:10px;text-align:center}
+.fm-stat .fsl{font-size:9px;color:#666}.fm-stat .fsv{font-size:14px;font-weight:600;margin-top:2px}
+.fm-hsl-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:11px}
+.fm-hsl-label{width:80px;color:#777;flex-shrink:0}.fm-hsl-track{flex:1;height:5px;background:#1a1a1a;border-radius:3px;overflow:hidden}
+.fm-hsl-fill{height:100%;border-radius:3px}.fm-hsl-val{width:36px;text-align:right;color:#aaa;font-family:'SF Mono',monospace;font-size:10px}
+.fm-desc{background:#0d0d0d;border-radius:8px;padding:12px;font-size:11px;color:#888;line-height:1.6;margin-bottom:12px}
+.fm-desc strong{color:#ddd}
+.fm-adj-group{margin-bottom:14px}
+.fm-adj-group h4{font-size:12px;font-weight:500;margin-bottom:8px;color:#f0c674}
+.fm-adj-row{display:grid;grid-template-columns:90px 1fr 45px 45px 50px;align-items:center;gap:4px;margin-bottom:5px;font-size:11px}
+.fm-adj-name{color:#777}.fm-adj-cur{text-align:right;color:#555;font-size:10px}
+.fm-adj-tgt{text-align:right;color:#999;font-size:10px}
+.fm-adj-delta{text-align:right;font-weight:600;font-size:11px;font-family:'SF Mono',monospace}
+.fm-adj-delta.pos{color:#7aac8a}.fm-adj-delta.neg{color:#c8956a}.fm-adj-delta.zero{color:#555}
+.fm-adj-bar{height:6px;background:#1a1a1a;border-radius:3px;position:relative}
+.fm-adj-bar-center{position:absolute;left:50%;top:0;bottom:0;width:1px;background:#252525}
+.fm-adj-bar-fill{position:absolute;top:0;height:100%;border-radius:3px}
+.fm-adj-bar-fill.p{background:linear-gradient(90deg,#5a8a6a,#7aac8a)}.fm-adj-bar-fill.n{background:linear-gradient(90deg,#c8956a,#a07050)}
+.fm-palette{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px}
+.fm-psw{width:28px;height:28px;border-radius:6px;cursor:pointer;border:2px solid transparent;transition:.15s}
+.fm-psw:hover{border-color:#fff;transform:scale(1.1)}
+.fm-curve-cv{width:100%;height:140px;display:block;border-radius:8px;background:#0d0d0d;margin-top:8px}
+.fm-radar-cv{width:100%;height:200px;display:block}
+.fm-note{background:rgba(240,198,116,.06);border:1px solid rgba(240,198,116,.15);border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:11px;color:#888;line-height:1.5}
+.fm-note strong{color:#f0c674}
+.fm-hue-cv{width:140px;height:140px;display:block}
+
 @media(max-width:1200px){.comp-panels{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:960px){.fm-panels{grid-template-columns:1fr}}
 @media(max-width:640px){.comp-panels,.cl-sections{grid-template-columns:1fr}}
 
 /* Golden */
@@ -250,6 +290,7 @@ canvas.hid{display:none}
 <button class="tab" data-t="wm">💧 批量水印</button>
 <button class="tab" data-t="focus">🔍 焦点检测</button>
 <button class="tab" data-t="checklist">📋 拍摄清单</button>
+<button class="tab" data-t="film">🎞 胶片模拟</button>
 </div>
 </header>
 
@@ -500,6 +541,54 @@ canvas.hid{display:none}
 <button class="btn btn-a" id="clExportBtn">导出清单图片</button>
 <button class="btn" id="clResetBtn">重新生成</button>
 </div>
+</div>
+</div>
+
+<!-- TAB 9: Film Simulator -->
+<div class="page" id="p-film">
+<div class="stitle">胶片色彩模拟分析 · Film Simulator</div>
+<p style="font-size:12px;color:#555;margin-bottom:8px">上传原片 → 选择目标胶片 → 获得在 Lightroom / Camera Raw 中的调参建议</p>
+<div style="font-size:10px;color:#555;background:#111;border:1px solid #1a1a1a;border-radius:8px;padding:10px 12px;margin-bottom:12px;line-height:1.7">
+<strong style="color:#aaa">📖 使用方法</strong><br>
+① 右侧方案中每行的<strong style="color:#f0c674">最右列(±数字)</strong>就是你要在 LR/ACR 对应滑块上调整的值<br>
+② <span style="color:#7aac8a">绿色正值</span> = 往右拉(增加)，<span style="color:#c8956a">橙色负值</span> = 往左拉(减少)，灰色 = 不用动<br>
+③ 「白平衡→色温/色调」对应 LR 白平衡面板；「影调」对应基本面板的曝光/对比度/黑白色阶；「HSL分色」对应 HSL 面板<br>
+④ 色调曲线请在 LR 的曲线面板中参照黄色曲线手动拉点<br>
+⑤ 胶片参数源自厂商 datasheet 物理模型推算，非经验猜测
+</div>
+<div class="dz" id="fmDZ"><div class="di">🎞</div><p>上传原片进行胶片模拟分析</p><input type="file" id="fmFI" accept="image/*"></div>
+<div style="margin-top:12px"><div style="font-size:11px;color:#555;margin-bottom:8px">选择目标胶片</div>
+<div class="fm-grid" id="fmGrid"></div></div>
+<div id="fmContent" style="display:none">
+<div class="fm-panels">
+<div class="fm-panel">
+<div class="fm-panel-head">📷 原图特征分析</div>
+<div class="fm-panel-body">
+<div class="fm-img-wrap"><img id="fmImg"></div>
+<div class="fm-stats" id="fmStats"></div>
+<div style="display:flex;gap:8px;margin-top:12px"><div style="flex:1"><div style="font-size:10px;color:#555;margin-bottom:4px">亮度直方图</div><canvas id="fmLumaHist" style="width:100%;height:56px;display:block;border-radius:6px;background:#0d0d0d"></canvas></div><div style="flex:1"><div style="font-size:10px;color:#555;margin-bottom:4px">RGB 直方图</div><canvas id="fmRgbHist" style="width:100%;height:56px;display:block;border-radius:6px;background:#0d0d0d"></canvas></div></div>
+<div style="display:flex;gap:12px;align-items:flex-start;margin-top:12px">
+<div style="flex-shrink:0;width:140px"><div style="font-size:10px;color:#555;margin-bottom:4px">色相分布</div><canvas class="fm-hue-cv" id="fmHueCv" width="280" height="280" style="width:140px;height:140px;display:block"></canvas></div>
+<div style="flex:1;min-width:0" id="fmHslBars"></div>
+</div>
+<div style="font-size:10px;color:#555;margin-top:8px">主色调</div>
+<div class="fm-palette" id="fmPalette"></div>
+</div>
+</div>
+<div class="fm-panel">
+<div class="fm-panel-head">🎬 <span id="fmTitle">选择胶片型号</span></div>
+<div class="fm-panel-body">
+<div class="fm-desc" id="fmDesc">上传图片并选择胶片后，将显示基于原图的差值调整方案。</div>
+<div class="fm-note" id="fmNote" style="display:none"></div>
+<div id="fmAdj"></div>
+<div style="font-size:10px;color:#555;margin-top:14px">原图 vs 调整后</div>
+<canvas class="fm-radar-cv" id="fmRadar" height="200"></canvas>
+<div style="font-size:10px;color:#555;margin-top:12px">建议色调曲线 <span style="color:#444">· LR: 色调曲线面板，按黄色圆点位置手动拉控制点</span></div>
+<canvas class="fm-curve-cv" id="fmCurve" height="140"></canvas>
+</div>
+</div>
+</div>
+<div style="margin-top:12px"><button class="btn" id="fmClr">清空</button></div>
 </div>
 </div>
 
@@ -1671,6 +1760,300 @@ ctx.fillText('Photo Toolbox · Shoot Checklist',W-P,H-16);ctx.textAlign='left';
 
 const a=document.createElement('a');a.download='shoot-checklist-'+clType+'.png';a.href=cv.toDataURL('image/png');a.click();toast('清单已导出');
 });
+
+// =========================================================
+// TAB 9: FILM SIMULATOR (v2 – adaptive analysis engine)
+// =========================================================
+const FM_HUE_RANGES={red:{lo:345,hi:15},orange:{lo:15,hi:45},yellow:{lo:45,hi:75},green:{lo:75,hi:165},aqua:{lo:165,hi:255},blue:{lo:255,hi:285},purple:{lo:285,hi:345}};
+function fmHueIn(h,lo,hi){return lo>hi?h>=lo||h<hi:h>=lo&&h<hi}
+// v3 preset: 参数来源于 spectral_film_lut (github.com/JanLohse/spectral_film_lut)
+// 基于胶片厂商datasheet的H&D特性曲线+光谱染料密度+光谱灵敏度，通过物理模型正向模拟后反算
+// 标准测试输入(灰阶+色卡) → 负片+印片模拟 → 对比输入输出提取特征参数
+const FM_FILMS={
+'kodak_5207':{name:'Kodak 5207 (250D)',brand:'Kodak',desc:'<strong>Kodak Vision3 250D</strong>：日光型电影负片。低饱和，绿色偏移大。暗部冷青(212°)。',wb:{warmth:-9.6,tint:-.4},tone:{blackPt:.6,whiteClip:15.3,contrast:69.1,midShift:1.5},color:{satScale:.535,vibrance:0},splitTone:{hlHue:156,hlStr:6.5,shHue:212,shStr:13},hsl:{red:{hShift:2.7,sMul:.9,lShift:0},orange:{hShift:3.3,sMul:1.045,lShift:0},yellow:{hShift:-2.7,sMul:.989,lShift:0},green:{hShift:31.4,sMul:1.18,lShift:0},aqua:{hShift:6.3,sMul:.808,lShift:0},blue:{hShift:0,sMul:1,lShift:0},purple:{hShift:.9,sMul:1.323,lShift:0}},curve:[[0,.006],[.25,.144],[.5,.515],[.75,.735],[1,.847]],grain:'fine'},
+'kodak_5219':{name:'Kodak 5219 (500T)',brand:'Kodak',desc:'<strong>Kodak Vision3 500T</strong>：钨丝灯型电影负片。最低饱和度。暗部冷青(215°)。',wb:{warmth:-9.5,tint:-.2},tone:{blackPt:.7,whiteClip:14.9,contrast:71,midShift:1.6},color:{satScale:.515,vibrance:0},splitTone:{hlHue:157,hlStr:6.5,shHue:215,shStr:14.6},hsl:{red:{hShift:2.7,sMul:.957,lShift:0},orange:{hShift:3.5,sMul:1.091,lShift:0},yellow:{hShift:-3.6,sMul:1.057,lShift:0},green:{hShift:29.7,sMul:1.098,lShift:0},aqua:{hShift:6.2,sMul:.896,lShift:0},blue:{hShift:0,sMul:1,lShift:0},purple:{hShift:.5,sMul:1.368,lShift:0}},curve:[[0,.007],[.25,.135],[.5,.517],[.75,.737],[1,.851]],grain:'fine'},
+'kodak_gold200':{name:'Kodak Gold 200',brand:'Kodak',desc:'<strong>柯达金200</strong>：最高饱和度和对比度。黑点提升明显。暗部偏青(199°)。',wb:{warmth:-10.3,tint:.6},tone:{blackPt:5.6,whiteClip:3.8,contrast:95.3,midShift:4.8},color:{satScale:.788,vibrance:0},splitTone:{hlHue:213,hlStr:11.9,shHue:199,shStr:29.4},hsl:{red:{hShift:1.9,sMul:.798,lShift:0},orange:{hShift:2.6,sMul:1.064,lShift:0},yellow:{hShift:-9.4,sMul:1.167,lShift:0},green:{hShift:26.1,sMul:.799,lShift:0},aqua:{hShift:5.7,sMul:1.052,lShift:0},blue:{hShift:0,sMul:1,lShift:0},purple:{hShift:7.2,sMul:1.151,lShift:0}},curve:[[0,.056],[.25,.104],[.5,.548],[.75,.859],[1,.963]],grain:'medium'},
+'kodak_portra160':{name:'Portra 160',brand:'Kodak',desc:'<strong>Portra 160</strong>：中性人像标杆。黄色偏移最大(-12.6°)，绿色抑制(-27.5°)。',wb:{warmth:-10.3,tint:-1},tone:{blackPt:8.3,whiteClip:9.1,contrast:74,midShift:2.3},color:{satScale:.629,vibrance:0},splitTone:{hlHue:281,hlStr:7.7,shHue:279,shStr:6.1},hsl:{red:{hShift:4.3,sMul:.942,lShift:0},orange:{hShift:-1.7,sMul:1.139,lShift:0},yellow:{hShift:-12.6,sMul:1.272,lShift:0},green:{hShift:-27.5,sMul:.725,lShift:0},aqua:{hShift:1.8,sMul:1,lShift:0},blue:{hShift:0,sMul:1,lShift:0},purple:{hShift:1,sMul:.995,lShift:0}},curve:[[0,.083],[.25,.167],[.5,.523],[.75,.788],[1,.909]],grain:'fine'},
+'kodak_portra400':{name:'Portra 400',brand:'Kodak',desc:'<strong>Portra 400</strong>：人像天花板。橙色增强(+1.19×)，黄色偏移大(-13°)。高光偏品红(308°)。',wb:{warmth:-11,tint:-1.3},tone:{blackPt:7.9,whiteClip:8.4,contrast:77.9,midShift:2},color:{satScale:.657,vibrance:0},splitTone:{hlHue:308,hlStr:15.2,shHue:251,shStr:5.5},hsl:{red:{hShift:6.5,sMul:.982,lShift:0},orange:{hShift:-1.8,sMul:1.192,lShift:0},yellow:{hShift:-13,sMul:1.292,lShift:0},green:{hShift:15.9,sMul:.969,lShift:0},aqua:{hShift:5.8,sMul:.913,lShift:0},blue:{hShift:0,sMul:1,lShift:0},purple:{hShift:7.4,sMul:1.121,lShift:0}},curve:[[0,.079],[.25,.152],[.5,.52],[.75,.798],[1,.916]],grain:'fine'},
+'kodak_portra800':{name:'Portra 800',brand:'Kodak',desc:'<strong>Portra 800</strong>：Portra系列最柔和。暗部偏品红(294°)，高光偏蓝(260°)。',wb:{warmth:-10.4,tint:-1.7},tone:{blackPt:8.6,whiteClip:10.6,contrast:71.2,midShift:1.8},color:{satScale:.626,vibrance:0},splitTone:{hlHue:260,hlStr:9,shHue:294,shStr:6.4},hsl:{red:{hShift:5.7,sMul:.947,lShift:0},orange:{hShift:.1,sMul:1.14,lShift:0},yellow:{hShift:-10.5,sMul:1.15,lShift:0},green:{hShift:31,sMul:1.007,lShift:0},aqua:{hShift:7.6,sMul:.844,lShift:0},blue:{hShift:0,sMul:1,lShift:0},purple:{hShift:5.3,sMul:1.111,lShift:0}},curve:[[0,.086],[.25,.172],[.5,.518],[.75,.776],[1,.894]],grain:'coarse'},
+'fuji_pro400h':{name:'Fuji PRO 400H',brand:'Fuji',desc:'<strong>富士PRO 400H</strong>（已停产）：最低饱和度(0.474)。暗部强烈冷青(202°/60.8)。高光偏暖(16°)。',wb:{warmth:-12.7,tint:1},tone:{blackPt:7.3,whiteClip:18.2,contrast:70.6,midShift:1.3},color:{satScale:.474,vibrance:0},splitTone:{hlHue:16,hlStr:10.7,shHue:202,shStr:60.8},hsl:{red:{hShift:-.6,sMul:1.127,lShift:0},orange:{hShift:.2,sMul:1.231,lShift:0},yellow:{hShift:-9.8,sMul:1.139,lShift:0},green:{hShift:-.2,sMul:.721,lShift:0},aqua:{hShift:5.9,sMul:.869,lShift:0},blue:{hShift:0,sMul:1,lShift:0},purple:{hShift:7.2,sMul:1.59,lShift:0}},curve:[[0,.074],[.25,.122],[.5,.513],[.75,.721],[1,.818]],grain:'fine'},
+'fuji_400':{name:'Superia 400',brand:'Fuji',desc:'<strong>富士Superia 400</strong>：最冷色温(-14)。暗部极强冷青(205°/64)。红色偏移最大(+13°)。',wb:{warmth:-14,tint:-.3},tone:{blackPt:5.3,whiteClip:16.2,contrast:75,midShift:1.5},color:{satScale:.571,vibrance:0},splitTone:{hlHue:332,hlStr:1.5,shHue:205,shStr:64},hsl:{red:{hShift:13,sMul:.99,lShift:0},orange:{hShift:4.6,sMul:1,lShift:0},yellow:{hShift:-4.9,sMul:.894,lShift:0},green:{hShift:29.2,sMul:.887,lShift:0},aqua:{hShift:8.6,sMul:1.01,lShift:0},blue:{hShift:0,sMul:1,lShift:0},purple:{hShift:8.7,sMul:1.373,lShift:0}},curve:[[0,.053],[.25,.105],[.5,.515],[.75,.733],[1,.838]],grain:'medium'},
+'fuji_200':{name:'Fujicolor 200',brand:'Fuji',desc:'<strong>富士200</strong>：暗部极强冷青(205°/63.2)。高光微暖(14°)。绿色大偏移(+27.5°)。',wb:{warmth:-11.7,tint:0},tone:{blackPt:5.2,whiteClip:16.2,contrast:74.6,midShift:.8},color:{satScale:.536,vibrance:0},splitTone:{hlHue:14,hlStr:7.6,shHue:205,shStr:63.2},hsl:{red:{hShift:7.1,sMul:1.054,lShift:0},orange:{hShift:3,sMul:1.14,lShift:0},yellow:{hShift:-8.4,sMul:1,lShift:0},green:{hShift:27.5,sMul:.867,lShift:0},aqua:{hShift:10.5,sMul:.899,lShift:0},blue:{hShift:0,sMul:1,lShift:0},purple:{hShift:9.3,sMul:1.463,lShift:0}},curve:[[0,.052],[.25,.111],[.5,.508],[.75,.736],[1,.838]],grain:'fine'},
+};
+
+let fmData=null,fmFilm=null,fmImgStats=null;
+(function(){const g=$('fmGrid');Object.entries(FM_FILMS).forEach(([k,f])=>{const c=document.createElement('button');c.className='fm-chip';c.dataset.film=k;c.innerHTML=`<span class="fm-brand">${f.brand}</span> ${f.name}`;c.addEventListener('click',()=>{document.querySelectorAll('.fm-chip').forEach(x=>x.classList.remove('active'));c.classList.add('active');fmFilm=k;if(fmImgStats)fmGenAdj()});g.appendChild(c)})})();
+
+const fmDZ=$('fmDZ'),fmFI=$('fmFI');
+fmDZ.addEventListener('click',()=>fmFI.click());
+fmDZ.addEventListener('dragover',e=>{e.preventDefault();fmDZ.classList.add('over')});
+fmDZ.addEventListener('dragleave',()=>fmDZ.classList.remove('over'));
+fmDZ.addEventListener('drop',e=>{e.preventDefault();fmDZ.classList.remove('over');e.dataTransfer.files[0]&&fmLoad(e.dataTransfer.files[0])});
+fmFI.addEventListener('change',e=>{if(e.target.files[0])fmLoad(e.target.files[0])});
+
+function fmLoad(f){if(!f.type.startsWith('image/'))return;const r=new FileReader();r.onload=e=>{const img=new Image();img.onload=()=>{$('fmImg').src=e.target.result;fmDZ.style.display='none';$('fmContent').style.display='block';fmAnalyze(img);if(fmFilm)fmGenAdj()};img.src=e.target.result};r.readAsDataURL(f)}
+function fmRgbToHsl(r,g,b){r/=255;g/=255;b/=255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b);let h,s,l=(mx+mn)/2;if(mx===mn)h=s=0;else{const d=mx-mn;s=l>.5?d/(2-mx-mn):d/(mx+mn);switch(mx){case r:h=((g-b)/d+(g<b?6:0))/6;break;case g:h=((b-r)/d+2)/6;break;case b:h=((r-g)/d+4)/6;break}}return[h,s,l]}
+
+// v2 analysis: percentile-based, 5-zone, per-channel stats
+function fmAnalyze(img){
+const cv=document.createElement('canvas');const mx=600;let w=img.width,h=img.height;
+if(w>mx||h>mx){const s=mx/Math.max(w,h);w=Math.round(w*s);h=Math.round(h*s)}
+cv.width=w;cv.height=h;const ctx=cv.getContext('2d');ctx.drawImage(img,0,0,w,h);
+const id=ctx.getImageData(0,0,w,h);const d=id.data,px=d.length/4;
+const lumaH=new Uint32Array(256);const rH=new Uint32Array(256),gH=new Uint32Array(256),bH=new Uint32Array(256);let rS=0,gS=0,bS=0;
+const hueH=new Float64Array(360);
+// 3 zones: shadow(<64), mid(64-192), highlight(>=192)
+const zones=[{rS:0,gS:0,bS:0,n:0,hW:new Float64Array(360),sS:0,sN:0},
+{rS:0,gS:0,bS:0,n:0,hW:new Float64Array(360),sS:0,sN:0},
+{rS:0,gS:0,bS:0,n:0,hW:new Float64Array(360),sS:0,sN:0}];
+const hrStats={};Object.keys(FM_HUE_RANGES).forEach(k=>hrStats[k]={sS:0,lS:0,n:0,hS:0});
+const sr=Math.max(1,Math.floor(px/25000));
+for(let i=0;i<d.length;i+=4){
+const r=d[i],g=d[i+1],b=d[i+2],l=.299*r+.587*g+.114*b;
+lumaH[Math.min(255,Math.round(l))]++;rH[r]++;gH[g]++;bH[b]++;rS+=r;gS+=g;bS+=b;
+const zi=l<64?0:l<192?1:2;
+zones[zi].rS+=r;zones[zi].gS+=g;zones[zi].bS+=b;zones[zi].n++;
+if((i/4)%sr===0){const[hh,ss,ll]=fmRgbToHsl(r,g,b);const hD=Math.floor(hh*360)%360;
+if(ss>.05){hueH[hD]+=ss;zones[zi].hW[hD]+=ss;zones[zi].sS+=ss;zones[zi].sN++;
+for(const[k,rng]of Object.entries(FM_HUE_RANGES)){if(fmHueIn(hD,rng.lo,rng.hi)){hrStats[k].sS+=ss;hrStats[k].lS+=ll;hrStats[k].n++;hrStats[k].hS+=hD*ss;break}}}}}
+function pctl(hist,p){let t=0;for(let i=0;i<256;i++)t+=hist[i];let a=0;const g=t*p;for(let i=0;i<256;i++){a+=hist[i];if(a>=g)return i}return 255}
+const p01=pctl(lumaH,.01),p05=pctl(lumaH,.05),p25=pctl(lumaH,.25),p50=pctl(lumaH,.5),p75=pctl(lumaH,.75),p95=pctl(lumaH,.95),p99=pctl(lumaH,.99);
+const avgR=rS/px,avgG=gS/px,avgB=bS/px;
+function domH(hw){let m=0,mh=0;for(let i=0;i<360;i++){let s=0;for(let j=-3;j<=3;j++)s+=hw[(i+j+360)%360];if(s>m){m=s;mh=i}}return mh}
+const hslStats={};
+for(const[k,st]of Object.entries(hrStats)){
+if(st.n>3){hslStats[k]={avgSat:st.sS/st.n,avgLum:st.lS/st.n,avgHue:st.sS>0?Math.round(st.hS/st.sS)%360:0,weight:st.n}}
+else{hslStats[k]=null}}
+const zoneStats=zones.map(z=>{if(z.n<10)return null;const ar=z.rS/z.n,ag=z.gS/z.n,ab=z.bS/z.n;
+const warmth=(ar-ab)/Math.max(1,(ar+ag+ab)/3)*100;const tint=(ag-(ar+ab)/2)/Math.max(1,(ar+ag+ab)/3)*100;
+return{avgR:ar,avgG:ag,avgB:ab,warmth,tint,domHue:domH(z.hW),avgSat:z.sN>0?z.sS/z.sN:0}});
+const bkts={};const step=Math.max(4,Math.floor(d.length/(4*3000))*4);
+for(let i=0;i<d.length;i+=step){const k=`${d[i]>>4},${d[i+1]>>4},${d[i+2]>>4}`;if(!bkts[k])bkts[k]={r:0,g:0,b:0,c:0};bkts[k].r+=d[i];bkts[k].g+=d[i+1];bkts[k].b+=d[i+2];bkts[k].c++}
+const domCols=Object.values(bkts).sort((a,b)=>b.c-a.c).slice(0,10).map(b=>({r:Math.round(b.r/b.c),g:Math.round(b.g/b.c),b:Math.round(b.b/b.c)}));
+const warmth=Math.round((avgR-avgB)/Math.max(1,(avgR+avgG+avgB)/3)*100);
+const tint=Math.round((avgG-(avgR+avgB)/2)/Math.max(1,(avgR+avgG+avgB)/3)*100);
+const m={avgR,avgG,avgB,warmth,tint,p01,p05,p25,p50,p75,p95,p99,dynamicRange:p99-p01,contrast:p75-p25,zoneStats,hslStats,lumaH,rH,gH,bH};
+fmImgStats={hueH,avgR,avgG,avgB,domCols,measured:m};fmRenderAnalysis()}
+
+function fmRenderAnalysis(){
+const m=fmImgStats.measured,zs=m.zoneStats;
+const shZ=zs[0]||{warmth:0,tint:0,avgSat:0,domHue:0};
+const hlZ=zs[2]||{warmth:0,tint:0,avgSat:0,domHue:0};
+$('fmStats').innerHTML=[
+{l:'色温偏移',v:(m.warmth>0?'+':'')+m.warmth,c:m.warmth>8?'#e8a87c':m.warmth<-8?'#7ac8e8':'#ccc'},
+{l:'色调偏移',v:(m.tint>0?'+':'')+m.tint,c:m.tint>5?'#c8a0d8':m.tint<-5?'#a0d8a0':'#ccc'},
+{l:'动态范围',v:m.dynamicRange,c:m.dynamicRange>200?'#8c8':'#ccc'},
+{l:'IQR对比',v:m.contrast,c:'#ccc'},
+{l:'暗部色偏',v:(shZ.warmth>0?'暖':'冷')+Math.abs(Math.round(shZ.warmth)),c:shZ.warmth>0?'#e8a87c':'#7ac8e8'},
+{l:'高光色偏',v:(hlZ.warmth>0?'暖':'冷')+Math.abs(Math.round(hlZ.warmth)),c:hlZ.warmth>0?'#e8a87c':'#7ac8e8'}
+].map(s=>`<div class="fm-stat"><div class="fsl">${s.l}</div><div class="fsv" style="color:${s.c}">${s.v}</div></div>`).join('');
+
+// 亮度直方图
+function drawHist(cvId,channels){
+const cv=$(cvId);const dpr=window.devicePixelRatio||1;const rect=cv.getBoundingClientRect();
+cv.width=rect.width*dpr;cv.height=rect.height*dpr;
+const ctx=cv.getContext('2d');ctx.scale(dpr,dpr);const W=rect.width,H=rect.height;
+ctx.clearRect(0,0,W,H);ctx.fillStyle='#0d0d0d';ctx.fillRect(0,0,W,H);
+channels.forEach(({data,color,alpha})=>{
+const mx=Math.max(...data)||1;
+ctx.fillStyle=color;ctx.globalAlpha=alpha||.7;
+for(let i=0;i<256;i++){const v=data[i]/mx;if(v<.005)continue;
+const x=(i/255)*W,w=Math.max(1,W/256),h2=v*(H-2);
+ctx.fillRect(x,H-1-h2,w,h2)}});
+ctx.globalAlpha=1}
+drawHist('fmLumaHist',[{data:m.lumaH,color:'#ccc',alpha:.6}]);
+drawHist('fmRgbHist',[{data:m.rH,color:'#e86060',alpha:.45},{data:m.gH,color:'#60c860',alpha:.4},{data:m.bH,color:'#6080e8',alpha:.4}]);
+
+// 计算主色相（最大权重色相）
+let domHueVal=0,domHueMax=0;
+for(let i=0;i<360;i++){let s=0;for(let j=-3;j<=3;j++)s+=fmImgStats.hueH[(i+j+360)%360];if(s>domHueMax){domHueMax=s;domHueVal=i}}
+// 加权饱和度
+let satW=0,satTW=0;
+for(const[k,st]of Object.entries(m.hslStats)){if(st){satW+=st.avgSat*st.weight;satTW+=st.weight}}
+const avgSatPct=satTW>0?Math.round(satW/satTW*100):0;
+const avgLuma=Math.round(m.p50/255*100);
+const rbDiff=Math.round(m.avgR-m.avgB);
+const gDiff=Math.round(m.avgG-(m.avgR+m.avgB)/2);
+
+$('fmHslBars').innerHTML=[
+{l:'主色相',v:domHueVal+'°',c:`hsl(${domHueVal},70%,55%)`,w:domHueVal/3.6},
+{l:'饱和度',v:avgSatPct+'%',c:'linear-gradient(90deg,#888,hsl(30,80%,55%))',w:avgSatPct},
+{l:'亮度(P50)',v:avgLuma+'%',c:'linear-gradient(90deg,#333,#eee)',w:avgLuma},
+{l:'红蓝偏差',v:(rbDiff>0?'+':'')+rbDiff,c:rbDiff>0?'#e8a87c':'#7ab8e8',w:Math.min(100,Math.abs(rbDiff)/2+50)},
+{l:'绿色偏差',v:(gDiff>0?'+':'')+gDiff,c:gDiff>0?'#a0d8a0':'#c8a0d8',w:Math.min(100,Math.abs(gDiff)/2+50)},
+].map(s=>`<div class="fm-hsl-row"><span class="fm-hsl-label">${s.l}</span><div class="fm-hsl-track"><div class="fm-hsl-fill" style="width:${Math.min(100,s.w)}%;background:${s.c}"></div></div><span class="fm-hsl-val">${s.v}</span></div>`).join('');
+
+// 色相环（每度一个扇形，确保完整覆盖）
+const hcv=$('fmHueCv');const dpr=window.devicePixelRatio||1;hcv.width=280*dpr;hcv.height=280*dpr;hcv.style.width='140px';hcv.style.height='140px';
+const hctx=hcv.getContext('2d');hctx.scale(dpr,dpr);const cx=70,cy=70,R=64;
+const hOff=-Math.PI/2,step=Math.PI/180;
+// 底色环：每度一个扇形，多画1°确保无缝
+for(let a=0;a<360;a++){hctx.beginPath();hctx.moveTo(cx,cy);hctx.arc(cx,cy,R,hOff+a*step,hOff+(a+2)*step);hctx.closePath();hctx.fillStyle=`hsl(${a},70%,45%)`;hctx.globalAlpha=.15;hctx.fill()}
+// 数据环：按权重绘制
+const mxH=Math.max(...fmImgStats.hueH)||1;hctx.globalAlpha=1;
+for(let a=0;a<360;a++){const v=fmImgStats.hueH[a]/mxH;if(v<.02)continue;
+hctx.beginPath();hctx.moveTo(cx,cy);
+hctx.arc(cx,cy,10+v*(R-12),hOff+a*step,hOff+(a+2)*step);hctx.closePath();
+hctx.fillStyle=`hsl(${a},75%,55%)`;hctx.globalAlpha=.5+v*.5;hctx.fill()}
+// 中心平均色
+hctx.globalAlpha=1;hctx.beginPath();hctx.arc(cx,cy,8,0,Math.PI*2);
+hctx.fillStyle=`rgb(${Math.round(fmImgStats.avgR)},${Math.round(fmImgStats.avgG)},${Math.round(fmImgStats.avgB)})`;
+hctx.fill();hctx.strokeStyle='#fff';hctx.lineWidth=1.5;hctx.stroke();
+$('fmPalette').innerHTML=fmImgStats.domCols.map(c=>`<div class="fm-psw" style="background:rgb(${c.r},${c.g},${c.b})" title="R:${c.r} G:${c.g} B:${c.b}"></div>`).join('')}
+
+// v2 adaptive adjustment generation
+function fmGenAdj(){
+if(!fmFilm||!fmImgStats)return;
+const film=FM_FILMS[fmFilm],m=fmImgStats.measured,zs=m.zoneStats;
+const shZ=zs[0]||{warmth:0,tint:0,avgSat:0,domHue:0};
+const hlZ=zs[2]||{warmth:0,tint:0,avgSat:0,domHue:0};
+$('fmTitle').textContent=film.name+' 调整方案';$('fmDesc').innerHTML=film.desc;
+$('fmNote').style.display='block';
+$('fmNote').innerHTML='<div style="display:grid;grid-template-columns:90px 1fr 45px 45px 50px;gap:0 4px;font-size:9px;color:#555;margin-bottom:6px;padding:0 0 6px;border-bottom:1px solid #1a1a1a"><span>LR 参数</span><span></span><span style="text-align:right;color:#555">现值</span><span style="text-align:right;color:#999">目标</span><span style="text-align:right;color:#f0c674;font-weight:600">调 ±</span></div>';
+function adjR(name,cur,tgt,delta,range,unit,note){
+const d=Math.round(delta),p=Math.min(50,Math.abs(d)/(range||50)*50),pos=d>=0;
+const left=pos?50:50-p,cls=d>0?'pos':d<0?'neg':'zero',bcls=pos?'p':'n';
+const u=unit||'';const nH=note?`<div style="font-size:9px;color:#666;padding:2px 0 4px 90px">${note}</div>`:'';
+return`<div class="fm-adj-row"><div class="fm-adj-name">${name}</div><div class="fm-adj-bar"><div class="fm-adj-bar-center"></div><div class="fm-adj-bar-fill ${bcls}" style="left:${left}%;width:${p}%"></div></div><div class="fm-adj-cur">${cur}${u}</div><div class="fm-adj-tgt">${tgt}${u}</div><div class="fm-adj-delta ${cls}">${d>0?'+':''}${d}${u}</div></div>${nH}`}
+
+// 1. WB: film.wb.warmth 是胶片在中性输入上产生的色偏（叠加量）
+// 如果原图已经在同方向偏移，衰减叠加量避免过度
+// 如果原图在反方向偏移，保持或略增叠加量
+function wbAdj(filmShift,origShift){
+  const sameDir=(filmShift>0&&origShift>0)||(filmShift<0&&origShift<0);
+  if(sameDir){
+    // 同方向：原图偏移越大→叠加越少（非线性衰减）
+    const excess=Math.abs(origShift)/Math.max(1,Math.abs(filmShift));
+    const decay=Math.max(0,1-excess*.5);
+    return Math.round(filmShift*decay);
+  }
+  // 反方向或原图中性：全量叠加
+  return Math.round(filmShift);
+}
+let tempAdj=wbAdj(film.wb.warmth,m.warmth);
+let tintAdj=wbAdj(film.wb.tint,m.tint);
+tempAdj=Math.max(-50,Math.min(50,tempAdj));
+tintAdj=Math.max(-30,Math.min(30,tintAdj));
+const wbN=[];
+if(Math.abs(m.warmth)>15){
+  const same=(film.wb.warmth>0&&m.warmth>0)||(film.wb.warmth<0&&m.warmth<0);
+  wbN.push(`原图${m.warmth>0?'偏暖':'偏冷'}(${m.warmth})${same?'，与胶片同方向，已衰减':''}`)
+}
+let html=`<div class="fm-adj-group"><h4>白平衡 <span style="font-size:9px;color:#555;font-weight:400">LR: 基本面板 → 白平衡</span></h4>${adjR('色温',m.warmth,film.wb.warmth,tempAdj,50,'',wbN.join(''))}${adjR('色调',m.tint,film.wb.tint,tintAdj,30)}</div>`;
+
+// 2. Tone: film.tone.blackPt/whiteClip 是胶片在中性输入上产生的影调变化（叠加量）
+const origBk=Math.round(m.p01/255*100),filmBk=film.tone.blackPt;
+// blackPt>0=提升黑点(变灰)。如果原图黑点已经很高(origBk大)，同方向衰减
+const bpAdj=origBk>filmBk?Math.round(filmBk*Math.max(0,1-origBk/filmBk*.3)):Math.round(filmBk);
+const origWc=Math.round((255-m.p99)/255*100),filmWc=film.tone.whiteClip;
+const wcAdj=origWc>filmWc?Math.round(filmWc*Math.max(0,1-origWc/filmWc*.3)):Math.round(filmWc);
+// 对比度：film.tone.contrast 反算时经过了(IQR-40)/1.6归一化，还原回IQR直接比较
+const origIQR=m.contrast;
+const targetIQR=Math.round(40+film.tone.contrast*1.6);
+const conAdj=Math.round((targetIQR-origIQR)/10*8);
+const conN=origIQR<60?'原图低对比，建议配合S曲线':origIQR>180?'原图高对比，微调即可':'';
+// 曝光：midShift 是胶片自带的中灰偏移（叠加量）
+const origMid=Math.round(m.p50/255*100);
+const expAdj=Math.round(film.tone.midShift*3)/10;
+html+=`<div class="fm-adj-group"><h4>影调 <span style="font-size:9px;color:#555;font-weight:400">LR: 基本面板 → 曝光/对比度/黑白色阶</span></h4>`;
+html+=adjR('黑色色阶',origBk,filmBk,bpAdj,40,'',`P1%=${m.p01}`);
+html+=adjR('白色色阶',-origWc,-filmWc,-wcAdj,30,'',`P99%=${m.p99}`);
+html+=adjR('对比度',origIQR,targetIQR,conAdj,50,'',conN);
+html+=adjR('曝光补偿','—',(expAdj>0?'+':'')+expAdj,expAdj,20,'EV',`中灰P50=${m.p50}，胶片偏移${film.tone.midShift>0?'+':''}${film.tone.midShift}`);
+html+=`</div>`;
+
+// 3. Color: weighted saturation
+let origSatW=0,tw=0;
+for(const[k,st]of Object.entries(m.hslStats)){if(st){origSatW+=st.avgSat*st.weight;tw+=st.weight}}
+const origSatPct=tw>0?Math.round(origSatW/tw*100):30;
+const targetSatPct=Math.round(film.color.satScale*origSatPct);
+const satDelta=targetSatPct-origSatPct;
+html+=`<div class="fm-adj-group"><h4>色彩 <span style="font-size:9px;color:#555;font-weight:400">LR: 基本面板 → 饱和度</span></h4>`;
+html+=adjR('饱和度',origSatPct,targetSatPct,satDelta,60,'%',`胶片缩放×${film.color.satScale}`);
+html+=`</div>`;
+
+// 4. Split tone: adapt to existing zone hues
+function hueDist(a,b){const d=Math.abs(a-b);return Math.min(d,360-d)}
+const shHD=hueDist(shZ.domHue||0,film.splitTone.shHue);
+const hlHD=hueDist(hlZ.domHue||0,film.splitTone.hlHue);
+const shStr=Math.round(film.splitTone.shStr*(shHD<30?.4:shHD<90?.7:1));
+const hlStr=Math.round(film.splitTone.hlStr*(hlHD<30?.4:hlHD<90?.7:1));
+const shN=shHD<30?`暗部已偏${shZ.domHue}°，接近目标，降低强度`:'';
+const hlN=hlHD<30?`高光已偏${hlZ.domHue}°，接近目标，降低强度`:'';
+html+=`<div class="fm-adj-group"><h4>分离色调 <span style="font-size:9px;color:#555;font-weight:400">LR: 色调分离 / ACR: 分离色调</span></h4>`;
+html+=`<div class="fm-adj-row"><div class="fm-adj-name">高光色相</div><div class="fm-adj-bar"><div class="fm-adj-bar-fill p" style="left:0;width:${(film.splitTone.hlHue/360)*100}%;background:hsl(${film.splitTone.hlHue},60%,55%)"></div></div><div class="fm-adj-cur">${hlZ.domHue||0}°</div><div class="fm-adj-tgt">${film.splitTone.hlHue}°</div><div class="fm-adj-delta zero">→${film.splitTone.hlHue}°</div></div>`;
+if(hlN)html+=`<div style="font-size:9px;color:#666;padding:2px 0 4px 90px">${hlN}</div>`;
+html+=adjR('高光强度','—',hlStr,hlStr,50,'',`胶片原始${film.splitTone.hlStr}${hlStr<film.splitTone.hlStr?'，已衰减':''}`);
+html+=`<div class="fm-adj-row"><div class="fm-adj-name">阴影色相</div><div class="fm-adj-bar"><div class="fm-adj-bar-fill p" style="left:0;width:${(film.splitTone.shHue/360)*100}%;background:hsl(${film.splitTone.shHue},60%,40%)"></div></div><div class="fm-adj-cur">${shZ.domHue||0}°</div><div class="fm-adj-tgt">${film.splitTone.shHue}°</div><div class="fm-adj-delta zero">→${film.splitTone.shHue}°</div></div>`;
+if(shN)html+=`<div style="font-size:9px;color:#666;padding:2px 0 4px 90px">${shN}</div>`;
+html+=adjR('阴影强度','—',shStr,shStr,50,'',`胶片原始${film.splitTone.shStr}${shStr<film.splitTone.shStr?'，已衰减':''}`);
+html+=`</div>`;
+
+// 5. HSL per-channel
+const hslI=[];const hNames={red:'红',orange:'橙',yellow:'黄',green:'绿',aqua:'青蓝',blue:'蓝紫',purple:'品红'};
+for(const[k]of Object.entries(FM_HUE_RANGES)){
+const origSt=m.hslStats[k];if(!origSt||origSt.avgSat<.03)continue;
+const fh=film.hsl[k];if(!fh)continue;
+if(fh.hShift)hslI.push(adjR(hNames[k]+' 色相',origSt.avgHue+'°',(origSt.avgHue+fh.hShift)+'°',fh.hShift,30,'°'));
+// HSL通道饱和度只用sMul，全局satScale已在全局饱和度中处理
+const ocs=Math.round(origSt.avgSat*100),tcs=Math.round(origSt.avgSat*fh.sMul*100);
+if(Math.abs(tcs-ocs)>2)hslI.push(adjR(hNames[k]+' 饱和度',ocs,tcs,tcs-ocs,60,'%',`×${fh.sMul}`));
+if(fh.lShift)hslI.push(adjR(hNames[k]+' 明度','—',(fh.lShift>0?'+':'')+fh.lShift,fh.lShift,20))}
+if(hslI.length)html+=`<div class="fm-adj-group"><h4>HSL 分色 <span style="font-size:9px;color:#555;font-weight:400">LR: HSL/颜色面板</span></h4>${hslI.join('')}</div>`;
+
+// 6. Grain
+html+=`<div class="fm-adj-group"><h4>效果 <span style="font-size:9px;color:#555;font-weight:400">LR: 效果面板 → 颗粒数量</span></h4><div class="fm-adj-row" style="grid-template-columns:90px 1fr 80px"><div class="fm-adj-name">颗粒</div><div></div><div class="fm-adj-delta zero">${film.grain==='fine'?'细(5-15)':film.grain==='medium'?'中(20-35)':'粗(40-60)'}</div></div></div>`;
+$('fmAdj').innerHTML=html;
+
+// Radar: original vs adjusted
+const cv=$('fmRadar');const dpr2=window.devicePixelRatio||1;const rect=cv.getBoundingClientRect();
+cv.width=rect.width*dpr2;cv.height=rect.height*dpr2;
+const rctx=cv.getContext('2d');rctx.scale(dpr2,dpr2);
+const W=rect.width,H=rect.height,cxr=W/2,cyr=H/2,RR=Math.min(W,H)/2-24;rctx.clearRect(0,0,W,H);
+const dims=[
+{l:'色温',mv:Math.max(0,Math.min(1,(m.warmth+50)/100)),tv:Math.max(0,Math.min(1,(m.warmth+tempAdj+50)/100))},
+{l:'饱和度',mv:origSatPct/100,tv:targetSatPct/100},
+{l:'对比度',mv:Math.min(1,origIQR/255),tv:Math.min(1,targetIQR/255)},
+{l:'暗部',mv:m.p05/255,tv:Math.min(1,(m.p05+bpAdj*2.55)/255)},
+{l:'高光',mv:m.p95/255,tv:Math.max(0,(m.p95-wcAdj*2.55)/255)}];
+const n=dims.length,as=Math.PI*2/n;
+for(let ring=1;ring<=4;ring++){const r=RR*ring/4;rctx.beginPath();for(let i=0;i<=n;i++){const a=-Math.PI/2+i*as;i?rctx.lineTo(cxr+Math.cos(a)*r,cyr+Math.sin(a)*r):rctx.moveTo(cxr+Math.cos(a)*r,cyr+Math.sin(a)*r)}rctx.strokeStyle='rgba(255,255,255,.06)';rctx.lineWidth=1;rctx.stroke()}
+for(let i=0;i<n;i++){const a=-Math.PI/2+i*as;rctx.beginPath();rctx.moveTo(cxr,cyr);rctx.lineTo(cxr+Math.cos(a)*RR,cyr+Math.sin(a)*RR);rctx.strokeStyle='rgba(255,255,255,.08)';rctx.stroke();rctx.fillStyle='rgba(255,255,255,.4)';rctx.font='10px sans-serif';rctx.textAlign='center';rctx.fillText(dims[i].l,cxr+Math.cos(a)*(RR+14),cyr+Math.sin(a)*(RR+14))}
+function poly(vals,stroke,fill){rctx.beginPath();vals.forEach((v,i)=>{const a=-Math.PI/2+i*as,r=Math.max(0,Math.min(1,v))*RR;i?rctx.lineTo(cxr+Math.cos(a)*r,cyr+Math.sin(a)*r):rctx.moveTo(cxr+Math.cos(a)*r,cyr+Math.sin(a)*r)});rctx.closePath();rctx.fillStyle=fill;rctx.fill();rctx.strokeStyle=stroke;rctx.lineWidth=2;rctx.stroke()}
+poly(dims.map(d=>d.mv),'rgba(160,160,170,.7)','rgba(160,160,170,.1)');
+poly(dims.map(d=>d.tv),'rgba(240,198,116,.8)','rgba(240,198,116,.1)');
+
+// Curve: map normalized film curve to image's actual luma range
+const fc=film.curve,effB=m.p01/255,effW=m.p99/255,effR=Math.max(.1,effW-effB);
+function mapPt(pt){const iA=Math.round((effB+pt[0]*effR)*255),oA=Math.round((effB+pt[1]*effR)*255);
+return[Math.max(0,Math.min(255,iA)),Math.max(0,Math.min(255,oA))]}
+const ca=fc.map(mapPt);
+const ccv=$('fmCurve');const dpr3=window.devicePixelRatio||1;const crect=ccv.getBoundingClientRect();
+ccv.width=crect.width*dpr3;ccv.height=crect.height*dpr3;
+const cctx=ccv.getContext('2d');cctx.scale(dpr3,dpr3);
+const CW=crect.width,CH=crect.height,pd=8;cctx.clearRect(0,0,CW,CH);cctx.fillStyle='#0d0d0d';cctx.fillRect(0,0,CW,CH);
+// histogram background
+const mxL=Math.max(...m.lumaH)||1;cctx.fillStyle='rgba(255,255,255,.04)';
+for(let i=0;i<256;i++){const v=m.lumaH[i]/mxL;if(v<.01)continue;cctx.fillRect(pd+(i/255)*(CW-2*pd),CH-pd-v*(CH-2*pd),Math.max(1,(CW-2*pd)/256),v*(CH-2*pd))}
+cctx.strokeStyle='rgba(255,255,255,.05)';for(let i=1;i<4;i++){const p=pd+(CW-2*pd)*i/4;cctx.beginPath();cctx.moveTo(p,pd);cctx.lineTo(p,CH-pd);cctx.stroke();const q=pd+(CH-2*pd)*i/4;cctx.beginPath();cctx.moveTo(pd,q);cctx.lineTo(CW-pd,q);cctx.stroke()}
+cctx.strokeStyle='rgba(255,255,255,.1)';cctx.setLineDash([3,3]);cctx.beginPath();cctx.moveTo(pd,CH-pd);cctx.lineTo(CW-pd,pd);cctx.stroke();cctx.setLineDash([]);
+const toX=v=>pd+(v/255)*(CW-2*pd),toY=v=>CH-pd-(v/255)*(CH-2*pd);
+// Catmull-Rom spline
+cctx.beginPath();cctx.moveTo(toX(ca[0][0]),toY(ca[0][1]));
+for(let i=0;i<ca.length-1;i++){
+const p0=ca[Math.max(0,i-1)],p1=ca[i],p2=ca[i+1],p3=ca[Math.min(ca.length-1,i+2)];
+const x1=toX(p1[0]),y1=toY(p1[1]),x2=toX(p2[0]),y2=toY(p2[1]);
+cctx.bezierCurveTo(x1+(toX(p2[0])-toX(p0[0]))/6,y1+(toY(p2[1])-toY(p0[1]))/6,x2-(toX(p3[0])-toX(p1[0]))/6,y2-(toY(p3[1])-toY(p1[1]))/6,x2,y2)}
+cctx.strokeStyle='rgba(240,198,116,.8)';cctx.lineWidth=2;cctx.stroke();
+ca.forEach(([x,y])=>{cctx.beginPath();cctx.arc(toX(x),toY(y),3.5,0,Math.PI*2);cctx.fillStyle='#f0c674';cctx.fill()});
+}
+
+$('fmClr').addEventListener('click',()=>{fmImgStats=null;fmData=null;fmFilm=null;fmFI.value='';
+document.querySelectorAll('.fm-chip').forEach(x=>x.classList.remove('active'));
+$('fmContent').style.display='none';fmDZ.style.display='block';$('fmAdj').innerHTML='';$('fmStats').innerHTML='';$('fmPalette').innerHTML='';
+$('fmTitle').textContent='选择胶片型号';$('fmDesc').textContent='上传图片并选择胶片后，将显示基于原图的差值调整方案。';$('fmNote').style.display='none';
+const rc=$('fmRadar').getContext('2d');rc.clearRect(0,0,$('fmRadar').width,$('fmRadar').height);
+const cc=$('fmCurve').getContext('2d');cc.clearRect(0,0,$('fmCurve').width,$('fmCurve').height)});
 </script>
 </body>
 </html>
